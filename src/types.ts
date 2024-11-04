@@ -1,3 +1,5 @@
+import { Socket } from "socket.io";
+
 export type Coordinates = { x: number; y: number };
 export type BombDetails = { col: number; row: number };
 export type SpoilDetails = { spoil_id: string };

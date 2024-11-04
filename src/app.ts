@@ -1,11 +1,17 @@
 import express from "express";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import http from "http";
 import path from "path";
 
 import { connection } from "../db";
 import Lobby from "./lobby";
 import Play from "./play";
+
+// Extend the Socket type to include `playInstance`
+interface CustomSocket extends Socket {
+  playInstance?: Play;
+  socket_game_id?: string | null;
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -30,11 +36,10 @@ const start = async () => {
 
     app.listen(PORT, () => console.log("Database connection successful"));
 
-    // Inside your socket connection handler
-    serverSocket.sockets.on("connection", (client) => {
+    serverSocket.sockets.on("connection", (client: CustomSocket) => {
       console.log(`New player has connected: ${client.id}`);
 
-      // Create a new Play instance for this client
+      // Create a new Play instance and store it on the client object
       const playerPlayInstance = new Play(
         client.id,
         (gameId: string) => {
@@ -42,6 +47,9 @@ const start = async () => {
         },
         serverSocket.to(client.id) // Logic for broadcasting events
       );
+
+      // Store the Play instance on the client object
+      client.playInstance = playerPlayInstance;
 
       // Lobby event handlers
       client.on("enter lobby", Lobby.onEnterLobby);
@@ -67,14 +75,11 @@ const start = async () => {
       client.on("leave game", () => playerPlayInstance.onLeaveGame());
 
       // Handle disconnection
-      client.on("disconnect", () => {
-        playerPlayInstance.onDisconnectFromGame();
-        onClientDisconnect(client);
-      });
+      client.on("disconnect", () => onClientDisconnect(client));
     });
 
-    // Handle client disconnection
-    function onClientDisconnect(client: any) {
+    // Refactor the `onClientDisconnect` function
+    function onClientDisconnect(client: CustomSocket) {
       if (client.socket_game_id == null) {
         console.log("Player was not inside any game...");
         return;
@@ -84,8 +89,10 @@ const start = async () => {
       // If the game is pending, use Lobby methods
       Lobby.onLeavePendingGame.call(client);
 
-      // If the game is active, use Play methods
-      Play.onDisconnectFromGame.call(client);
+      // If the game is active, use the `Play` instance method
+      if (client.playInstance) {
+        client.playInstance.onDisconnectFromGame();
+      }
     }
   } catch (error: any) {
     console.log(`Server not running. Error message: ${error.message}`);
