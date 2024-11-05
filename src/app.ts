@@ -16,13 +16,18 @@ interface CustomSocket extends Socket {
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
-export const serverSocket = new Server(server);
+export const serverSocket = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
 // Use static files from the client directory
 app.use(express.static(path.join(__dirname, "..", "client")));
 
 app.get("/", (req, res) => {
   console.log("Socket listening on :4000");
+  res.sendStatus(200);
 });
 
 server.listen(4000, () => {

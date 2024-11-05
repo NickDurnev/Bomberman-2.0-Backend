@@ -34,6 +34,7 @@ const Lobby = {
     map_name: string,
     callback: (data: { game_id: string }) => void
   ) {
+    console.log("Creating a new game...");
     const newGame = new Game({ map_name });
     pendingGames.set(newGame.id, newGame);
 

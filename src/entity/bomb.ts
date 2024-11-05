@@ -3,7 +3,7 @@ import {
   DESTRUCTIBLE_CELL,
   NON_DESTRUCTIBLE_CELL,
   SPOIL_CHANCE,
-} from "../constants.js";
+} from "../constants";
 import { Spoil } from "./spoil";
 import { v4 as uuidv4 } from "uuid";
 

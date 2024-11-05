@@ -4,9 +4,9 @@
   "description": "Bomberman 2.0 backend server",
   "main": "server.js",
   "scripts": {
-    "start": "node ./server.js",
+    "start": "node dist/src/app.js",
     "build": "npx tsc",
-    "dev": "nodemon src/index.ts"
+    "dev": "nodemon src/app.ts"
   },
   "author": "",
   "license": "ISC",
