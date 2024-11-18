@@ -1,9 +1,11 @@
 import express from "express";
+import cors from "cors";
 import { Server, Socket } from "socket.io";
 import http from "http";
 import path from "path";
 
-import { connection } from "../db";
+import router from "./routes/index";
+import { connection } from "./db";
 import Lobby from "./lobby";
 import Play from "./play";
 
@@ -13,7 +15,14 @@ interface CustomSocket extends Socket {
   socket_game_id?: string | null;
 }
 
+const corsOptions = {
+  origin: "http://localhost:8080", // Replace with your frontend URL
+  optionsSuccessStatus: 200,
+};
+
 const app = express();
+app.use(cors(corsOptions));
+app.use(express.json());
 const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 export const serverSocket = new Server(server, {
@@ -29,6 +38,8 @@ app.get("/", (req, res) => {
   console.log("Socket listening on :4000");
   res.sendStatus(200);
 });
+
+app.use("/api/v1", router);
 
 server.listen(4000, () => {
   console.log("Socket listening on :4000");
@@ -78,6 +89,16 @@ const start = async () => {
         playerPlayInstance.onPlayerDied(deathCoordinates)
       );
       client.on("leave game", () => playerPlayInstance.onLeaveGame());
+
+      client.on("joinRoom", (req) => {
+        const { room_id } = req;
+        client.join(room_id);
+      });
+
+      client.on("leaveRoom", async (req) => {
+        const { room_id } = req;
+        client.leave(room_id);
+      });
 
       // Handle disconnection
       client.on("disconnect", () => onClientDisconnect(client));

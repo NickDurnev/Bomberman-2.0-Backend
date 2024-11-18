@@ -5,7 +5,9 @@
       "@services/*": ["src/services/*"],
       "@utils/*": ["src/utils/*"],
       "@entity/*": ["src/entity/*"],
-      "@routes/*": ["src/routes/*"]
+      "@routes/*": ["src/routes/*"],
+      "@middlewares/*": ["src/middlewares/*"],
+      "@db/*": ["src/db/*"]
     },
     "target": "es6",
     "module": "commonjs",
