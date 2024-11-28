@@ -11,12 +11,13 @@ import Play from "./play";
 
 // Extend the Socket type to include `playInstance`
 interface CustomSocket extends Socket {
+  customId?: string;
   playInstance?: Play;
   socket_game_id?: string | null;
 }
 
 const corsOptions = {
-  origin: "http://localhost:8080", // Replace with your frontend URL
+  origin: "http://localhost:3000", // Replace with your frontend URL
   optionsSuccessStatus: 200,
 };
 
@@ -54,6 +55,21 @@ const start = async () => {
 
     serverSocket.sockets.on("connection", (client: CustomSocket) => {
       console.log(`New player has connected: ${client.id}`);
+
+      //update user socket id
+      client.on("updateUserSocketId", (req, callback) => {
+        console.log("req:", req);
+
+        //TODO Store req.socket_id in db
+
+        client.customId = req.socket_id;
+
+        callback({
+          status: 200,
+          message: "Socket id updated successfully",
+        });
+        console.log("doneeee");
+      });
 
       // Create a new Play instance and store it on the client object
       const playerPlayInstance = new Play(

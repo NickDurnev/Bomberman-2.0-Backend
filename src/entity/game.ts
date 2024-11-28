@@ -91,8 +91,8 @@ export class Game {
     const spawnOnGrid = this.playerSpawns[index];
     this.playerSpawns.splice(index, 1);
     const spawn = {
-      x: spawnOnGrid.col * TILE_SIZE,
-      y: spawnOnGrid.row * TILE_SIZE,
+      x: spawnOnGrid?.col * TILE_SIZE,
+      y: spawnOnGrid?.row * TILE_SIZE,
     };
     return [spawn, spawnOnGrid];
   }
