@@ -13,17 +13,3 @@ export const NON_DESTRUCTIBLE_CELL = 1;
 
 export const INITIAL_POWER = 1;
 export const STEP_POWER = 1;
-
-export const SKINS = [
-  "Theodora",
-  "Ringo",
-  "Jeniffer",
-  "Godard",
-  "Biarid",
-  "Solia",
-  "Kedan",
-  "Nigob",
-  "Baradir",
-  "Raviel",
-  "Valpo",
-];

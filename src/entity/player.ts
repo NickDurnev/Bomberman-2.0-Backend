@@ -1,36 +1,18 @@
 import { POWER, INITIAL_POWER, STEP_POWER } from "../constants";
-
-interface Spawn {
-  x: number;
-  y: number;
-}
-
-interface SpawnOnGrid {
-  row: number;
-  col: number;
-}
-
+import { Spawn, SpawnOnGrid, Player as IPlayer } from "@types";
 class Player {
   id: string;
   skin: string;
+  name: string;
   spawn: Spawn;
   spawnOnGrid: SpawnOnGrid;
   isAlive: boolean;
   power: number;
 
-  constructor({
-    id,
-    skin,
-    spawn,
-    spawnOnGrid,
-  }: {
-    id: string;
-    skin: string;
-    spawn: Spawn;
-    spawnOnGrid: SpawnOnGrid;
-  }) {
+  constructor({ id, skin, name, spawn, spawnOnGrid }: IPlayer) {
     this.id = id;
     this.skin = skin;
+    this.name = name;
     this.spawn = spawn;
     this.spawnOnGrid = spawnOnGrid;
 

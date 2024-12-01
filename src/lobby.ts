@@ -1,4 +1,4 @@
-import { Socket } from "socket.io";
+import { CustomSocket } from "@types";
 import { Game } from "./entity/game";
 import { serverSocket } from "./app";
 
@@ -10,10 +10,6 @@ const pendingGames = new Map<string, Game>();
 
 interface EnterPendingGameData {
   game_id: string;
-}
-
-interface CustomSocket extends Socket {
-  socket_game_id?: string | null;
 }
 
 const Lobby = {
@@ -45,7 +41,10 @@ const Lobby = {
     callback({ game_id: newGame.id });
   },
 
-  onEnterPendingGame(this: CustomSocket, { game_id }: EnterPendingGameData) {
+  async onEnterPendingGame(
+    this: CustomSocket,
+    { game_id }: EnterPendingGameData
+  ) {
     const current_game = pendingGames.get(game_id);
 
     if (current_game) {
@@ -53,7 +52,7 @@ const Lobby = {
 
       // Save current game ID in the socket object
       this.socket_game_id = current_game.id;
-      current_game.addPlayer(this.id);
+      await current_game.addPlayer(this.customId || "");
 
       if (current_game.isFull()) {
         Lobby.updateLobbyGames();
@@ -69,7 +68,7 @@ const Lobby = {
     if (current_game) {
       this.leave(current_game.id);
       this.socket_game_id = null;
-      current_game.removePlayer(this.id);
+      current_game.removePlayer(this.customId || "");
 
       if (current_game.isEmpty()) {
         pendingGames.delete(current_game.id);

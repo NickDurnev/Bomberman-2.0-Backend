@@ -68,11 +68,13 @@ class Play {
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
-    const currentPlayer = currentGame.players[this.id];
+    const currentPlayer = currentGame.players.find(
+      (player) => player.id === this.id
+    );
     const bomb = currentGame.addBomb({
       col,
       row,
-      power: currentPlayer.power,
+      power: currentPlayer?.power ?? 1,
     });
 
     if (bomb) {
@@ -98,15 +100,17 @@ class Play {
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
-    const currentPlayer = currentGame.players[this.id];
+    const currentPlayer = currentGame.players.find(
+      (player) => player.id === this.id
+    );
     const spoil = currentGame.findSpoil(spoil_id);
 
     if (spoil) {
       currentGame.deleteSpoil(spoil.id);
-      currentPlayer.pickSpoil(spoil.spoil_type);
+      currentPlayer?.pickSpoil(spoil.spoil_type);
 
       serverSocket.sockets.to(gameId).emit("spoil was picked", {
-        player_id: currentPlayer.id,
+        player_id: currentPlayer?.id,
         spoil_id: spoil.id,
         spoil_type: spoil.spoil_type,
       });
@@ -124,8 +128,10 @@ class Play {
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
-    const currentPlayer = currentGame.players[this.id];
-    currentPlayer.dead();
+    const currentPlayer = currentGame.players.find(
+      (player) => player.id === this.id
+    );
+    currentPlayer?.dead();
 
     let alivePlayersCount = 0;
     let alivePlayerSkin: string | null = null;

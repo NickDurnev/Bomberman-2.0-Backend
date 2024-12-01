@@ -8,6 +8,7 @@ const UserSchema = new Schema(
       required: [true, "Set email for user"],
       unique: true,
     },
+    socketID: String,
     locale: String,
     picture: String,
   },

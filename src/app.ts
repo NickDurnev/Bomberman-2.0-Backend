@@ -1,20 +1,15 @@
 import express from "express";
 import cors from "cors";
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import http from "http";
 import path from "path";
 
+import { storeSocketID } from "@services/socket";
+import { CustomSocket } from "@types";
 import router from "./routes/index";
 import { connection } from "./db";
 import Lobby from "./lobby";
 import Play from "./play";
-
-// Extend the Socket type to include `playInstance`
-interface CustomSocket extends Socket {
-  customId?: string;
-  playInstance?: Play;
-  socket_game_id?: string | null;
-}
 
 const corsOptions = {
   origin: "http://localhost:3000", // Replace with your frontend URL
@@ -57,10 +52,11 @@ const start = async () => {
       console.log(`New player has connected: ${client.id}`);
 
       //update user socket id
-      client.on("updateUserSocketId", (req, callback) => {
+      client.on("updateUserSocketId", async (req, callback) => {
+        console.log("updateUserSocketId:");
         console.log("req:", req);
 
-        //TODO Store req.socket_id in db
+        await storeSocketID(req.email, req.socket_id);
 
         client.customId = req.socket_id;
 

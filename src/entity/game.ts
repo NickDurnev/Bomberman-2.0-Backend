@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
 import { faker } from "@faker-js/faker";
+import { getUserBySocketId } from "@services/socket";
+import { User } from "@types";
 import {
   TILE_SIZE,
   EMPTY_CELL,
   DESTRUCTIBLE_CELL,
   NON_DESTRUCTIBLE_CELL,
-  SKINS,
 } from "../constants";
 import Player from "./player";
 import { Bomb } from "./bomb";
@@ -30,8 +31,7 @@ export class Game {
   map_name: string;
   layer_info: LayerInfo;
   max_players: number;
-  players: Record<string, Player>;
-  playerSkins: string[];
+  players: Player[];
   playerSpawns: { row: number; col: number }[];
   shadow_map: number[][];
   spoils: Map<string, any>;
@@ -44,43 +44,46 @@ export class Game {
     this.layer_info = require(`../maps/${this.map_name}.json`)
       .layers[0] as LayerInfo;
     this.max_players = this.layer_info.properties.max_players;
-    this.players = {};
-    this.playerSkins = [...SKINS];
+    this.players = [];
+    console.log("this.players:", this.players);
     this.playerSpawns = [...this.layer_info.properties.spawns];
     this.shadow_map = this.createMapData();
     this.spoils = new Map();
     this.bombs = new Map();
   }
 
-  addPlayer(id: string) {
-    const skin = this.getAndRemoveSkin();
+  async addPlayer(id: string) {
+    const user = await this.getUserInfo(id);
     const [spawn, spawnOnGrid] = this.getAndRemoveSpawn();
-    const player = new Player({ id, skin, spawn, spawnOnGrid });
-    this.players[player.id] = player;
+    const player = new Player({
+      id,
+      skin: user.picture,
+      name: user.name,
+      spawn,
+      spawnOnGrid,
+    });
+    this.players.push(player);
   }
 
   removePlayer(id: string) {
-    const player = this.players[id];
+    const player = this.players.find((player) => player.id === id);
     if (player) {
-      this.playerSkins.push(player.skin);
       this.playerSpawns.push(player.spawnOnGrid);
-      delete this.players[id];
+      this.players.splice(this.players.indexOf(player), 1);
     }
   }
 
   isEmpty(): boolean {
-    return Object.keys(this.players).length === 0;
+    return this.players.length === 0;
   }
 
   isFull(): boolean {
-    return Object.keys(this.players).length === this.max_players;
+    return this.players.length === this.max_players;
   }
 
-  private getAndRemoveSkin(): string {
-    const index = Math.floor(Math.random() * this.playerSkins.length);
-    const randomSkin = this.playerSkins[index];
-    this.playerSkins.splice(index, 1);
-    return randomSkin;
+  private async getUserInfo(id: string): Promise<User> {
+    const user = await getUserBySocketId(id);
+    return user;
   }
 
   private getAndRemoveSpawn(): [
