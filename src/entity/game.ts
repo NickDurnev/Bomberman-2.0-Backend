@@ -54,11 +54,21 @@ export class Game {
 
   async addPlayer(id: string) {
     const user = await this.getUserInfo(id);
+
+    const existPlayer = this.players.find(
+      (player) => player.name === user?.name && player.skin === user?.picture
+    );
+
+    if (existPlayer) {
+      this.playerSpawns.push(existPlayer.spawnOnGrid);
+      this.players.splice(this.players.indexOf(existPlayer), 1);
+    }
+
     const [spawn, spawnOnGrid] = this.getAndRemoveSpawn();
     const player = new Player({
       id,
-      skin: user.picture,
-      name: user.name,
+      skin: user?.picture || faker.image.avatar(),
+      name: user?.name || faker.internet.username(),
       spawn,
       spawnOnGrid,
     });
