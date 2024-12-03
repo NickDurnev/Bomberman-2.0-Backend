@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { faker } from "@faker-js/faker";
 import { getUserBySocketId } from "@services/socket";
-import { User } from "@types";
+import { User, NewGamePayload } from "@types";
 import {
   TILE_SIZE,
   EMPTY_CELL,
@@ -28,7 +28,7 @@ interface LayerInfo {
 export class Game {
   id: string;
   name: string;
-  map_name: string;
+  mapName: string;
   layer_info: LayerInfo;
   max_players: number;
   players: Player[];
@@ -37,11 +37,11 @@ export class Game {
   spoils: Map<string, any>;
   bombs: Map<string, Bomb>;
 
-  constructor({ map_name }: { map_name: string }) {
+  constructor({ mapName, gameName }: NewGamePayload) {
     this.id = uuidv4();
-    this.name = faker.internet.username();
-    this.map_name = map_name;
-    this.layer_info = require(`../maps/${this.map_name}.json`)
+    this.name = gameName;
+    this.mapName = mapName;
+    this.layer_info = require(`../maps/${this.mapName}.json`)
       .layers[0] as LayerInfo;
     this.max_players = this.layer_info.properties.max_players;
     this.players = [];

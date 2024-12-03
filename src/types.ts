@@ -16,6 +16,11 @@ export type SpawnOnGrid = {
   col: number;
 };
 
+export type NewGamePayload = {
+  mapName: string;
+  gameName: string;
+};
+
 export type User = {
   name: string;
   email: string;

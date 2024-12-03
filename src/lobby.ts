@@ -1,4 +1,4 @@
-import { CustomSocket } from "@types";
+import { CustomSocket, NewGamePayload } from "@types";
 import { Game } from "./entity/game";
 import { serverSocket } from "./app";
 
@@ -27,11 +27,10 @@ const Lobby = {
 
   onCreateGame(
     this: CustomSocket,
-    map_name: string,
+    { mapName, gameName }: NewGamePayload,
     callback: (data: { game_id: string }) => void
   ) {
-    console.log("Creating a new game...");
-    const newGame = new Game({ map_name });
+    const newGame = new Game({ mapName, gameName });
     pendingGames.set(newGame.id, newGame);
 
     // Update the lobby games list
