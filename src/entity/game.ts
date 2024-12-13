@@ -67,8 +67,8 @@ export class Game {
     const [spawn, spawnOnGrid] = this.getAndRemoveSpawn();
     const player = new Player({
       id,
-      skin: user?.picture || faker.image.avatar(),
-      name: user?.name || faker.internet.username(),
+      skin: user?.picture || "",
+      name: user?.name || "",
       spawn,
       spawnOnGrid,
     });

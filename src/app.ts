@@ -87,7 +87,17 @@ const start = async () => {
       client.on("leave pending game", Lobby.onLeavePendingGame);
 
       // Play event handlers using the `Play` instance
-      client.on("start game", () => playerPlayInstance.onStartGame());
+      client.on(
+        "get current game",
+        (game_id: string, callback: (game: any) => void) => {
+          const game = playerPlayInstance.onGetCurrentGame(game_id);
+          console.log("Game fetched:", game);
+          callback(game); // Send the game data back to the client
+        }
+      );
+      client.on("start game", (game_id: string) =>
+        playerPlayInstance.onStartGame(game_id)
+      );
       client.on("update player position", (coordinates) =>
         playerPlayInstance.updatePlayerPosition(coordinates)
       );

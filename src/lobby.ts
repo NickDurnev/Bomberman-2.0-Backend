@@ -8,10 +8,6 @@ const lobbyId = "lobby_room";
 // Map to store pending games
 const pendingGames = new Map<string, Game>();
 
-interface EnterPendingGameData {
-  game_id: string;
-}
-
 const Lobby = {
   onEnterLobby(this: CustomSocket, callback: (games: Game[]) => void) {
     // Join the lobby room
@@ -40,10 +36,7 @@ const Lobby = {
     callback({ game_id: newGame.id });
   },
 
-  async onEnterPendingGame(
-    this: CustomSocket,
-    { game_id }: EnterPendingGameData
-  ) {
+  async onEnterPendingGame(this: CustomSocket, game_id: string) {
     const current_game = pendingGames.get(game_id);
 
     if (current_game) {
