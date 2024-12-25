@@ -7,8 +7,8 @@ export const SPEED = 0;
 export const POWER = 1;
 export const DELAY = 2;
 
-export const EMPTY_CELL = 0;
-export const DESTRUCTIBLE_CELL = 2;
+export const EMPTY_CELL = 6;
+export const DESTRUCTIBLE_CELL = 5;
 export const NON_DESTRUCTIBLE_CELL = 1;
 
 export const INITIAL_POWER = 1;

@@ -32,8 +32,6 @@ class Play {
   }
 
   onStartGame(game_id: string) {
-    console.log("game_id:", game_id);
-    console.log("this.socket_game_id:", this.socket_game_id);
     this.socket_game_id = game_id;
 
     const game = Lobby.deletePendingGame(this.socket_game_id);
@@ -44,7 +42,6 @@ class Play {
   }
 
   onGetCurrentGame(game_id: string) {
-    console.log(runningGames);
     return runningGames.get(game_id);
   }
 
@@ -69,6 +66,7 @@ class Play {
   }
 
   createBomb({ col, row }: BombDetails) {
+    console.log("this.socket_game_id:", this.socket_game_id);
     if (!this.socket_game_id) return;
 
     const gameId = this.socket_game_id;

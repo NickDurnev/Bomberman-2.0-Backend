@@ -60,20 +60,21 @@ export class Bomb {
         const currentCol = col + direction.x * i;
 
         const cell = this.game.getMapCell(currentRow, currentCol);
+        console.log("cell:", cell);
         const isWall = cell === NON_DESTRUCTIBLE_CELL;
-        const isBalk = cell === DESTRUCTIBLE_CELL;
+        const isBox = cell === DESTRUCTIBLE_CELL;
         const isLast = i === power;
 
         if (cell === DESTRUCTIBLE_CELL) {
           this.game.nullifyMapCell(currentRow, currentCol);
         }
 
-        if (isBalk || isWall || isLast) {
-          this.addToBlasted(currentRow, currentCol, direction.end, isBalk);
+        if (isBox || isWall || isLast) {
+          this.addToBlasted(currentRow, currentCol, direction.end, isBox);
           break;
         }
 
-        this.addToBlasted(currentRow, currentCol, direction.plumb, isBalk);
+        this.addToBlasted(currentRow, currentCol, direction.plumb, isBox);
       }
     }
 

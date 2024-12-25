@@ -20,7 +20,7 @@ interface LayerInfo {
     max_players: number;
     empty: number;
     wall: number;
-    balk: number;
+    box: number;
     spawns: { row: number; col: number }[];
   };
 }
@@ -115,7 +115,7 @@ export class Game {
       data: tiles,
       width,
       height,
-      properties: { empty, wall, balk },
+      properties: { empty, wall, box },
     } = this.layer_info;
     const mapMatrix: number[][] = [];
     let i = 0;
@@ -124,7 +124,7 @@ export class Game {
       mapMatrix.push([]);
       for (let col = 0; col < width; col++) {
         mapMatrix[row][col] = EMPTY_CELL;
-        if (tiles[i] === balk) {
+        if (tiles[i] === box) {
           mapMatrix[row][col] = DESTRUCTIBLE_CELL;
         } else if (tiles[i] === wall) {
           mapMatrix[row][col] = NON_DESTRUCTIBLE_CELL;
