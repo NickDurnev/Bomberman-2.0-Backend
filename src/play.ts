@@ -65,8 +65,7 @@ class Play {
     }
   }
 
-  createBomb({ col, row }: BombDetails) {
-    console.log("this.socket_game_id:", this.socket_game_id);
+  createBomb({ col, row, playerId }: BombDetails) {
     if (!this.socket_game_id) return;
 
     const gameId = this.socket_game_id;
@@ -74,7 +73,7 @@ class Play {
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === this.id
+      (player) => player.id === playerId
     );
     const bomb = currentGame.addBomb({
       col,
@@ -98,7 +97,7 @@ class Play {
     }
   }
 
-  onPickUpSpoil({ spoil_id }: SpoilDetails) {
+  onPickUpSpoil({ spoil_id, playerId }: SpoilDetails) {
     if (!this.socket_game_id) return;
 
     const gameId = this.socket_game_id;
@@ -106,7 +105,7 @@ class Play {
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === this.id
+      (player) => player.id === playerId
     );
     const spoil = currentGame.findSpoil(spoil_id);
 
@@ -122,19 +121,21 @@ class Play {
     }
   }
 
-  onPlayerDied(coordinates: PlayerDeathCoordinates) {
+  onPlayerDied({ x, y, playerId }: PlayerDeathCoordinates) {
     if (!this.socket_game_id) return;
+
+    const coordinates = { x, y };
 
     serverSocket.sockets
       .to(this.socket_game_id)
-      .emit("show bones", { player_id: this.id, ...coordinates });
+      .emit("show bones", { player_id: playerId, ...coordinates });
 
     const gameId = this.socket_game_id;
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === this.id
+      (player) => player.id === playerId
     );
     currentPlayer?.dead();
 

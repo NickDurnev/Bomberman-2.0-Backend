@@ -2,9 +2,9 @@ import { Socket } from "socket.io";
 import Play from "./play";
 
 export type Coordinates = { x: number; y: number };
-export type BombDetails = { col: number; row: number };
-export type SpoilDetails = { spoil_id: string };
-export type PlayerDeathCoordinates = { x: number; y: number };
+export type BombDetails = { col: number; row: number; playerId: string };
+export type SpoilDetails = { spoil_id: string; playerId: string };
+export type PlayerDeathCoordinates = Coordinates & { playerId: string };
 
 export type Spawn = {
   x: number;
