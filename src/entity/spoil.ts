@@ -1,4 +1,4 @@
-import { SPEED, POWER, DELAY } from "../constants";
+import { SPEED, POWER, BOMBS } from "../constants";
 import { v4 as uuidv4 } from "uuid";
 
 export class Spoil {
@@ -15,7 +15,7 @@ export class Spoil {
   }
 
   private spoilType(): number {
-    const spoilTypes = [SPEED, POWER, DELAY];
+    const spoilTypes = [SPEED, POWER, BOMBS];
     return spoilTypes[Math.floor(Math.random() * spoilTypes.length)];
   }
 }

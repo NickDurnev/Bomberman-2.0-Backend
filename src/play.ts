@@ -1,11 +1,12 @@
-import Lobby from "./lobby";
-import { Game } from "./entity/game";
+import { Game } from "@entity/game";
 import {
   Coordinates,
   BombDetails,
   SpoilDetails,
   PlayerDeathCoordinates,
-} from "./types";
+} from "@types";
+import { GAME_DURATION } from "@constants";
+import Lobby from "./lobby";
 import { serverSocket } from "./app";
 
 const runningGames: Map<string, Game> = new Map();
@@ -38,6 +39,11 @@ class Play {
     if (!game) return; // Type check to ensure `game` is defined
     runningGames.set(game.id, game);
     console.log(`Game ${game.id} has started...`);
+
+    setTimeout(() => {
+      console.log(`Game ${game.id} has finished...`);
+      //TODO ADD finish game socket emit to all players in the game room
+    }, GAME_DURATION);
     serverSocket.sockets.in(game.id).emit("launch game", game);
   }
 
