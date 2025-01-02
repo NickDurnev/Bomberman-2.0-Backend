@@ -3,7 +3,7 @@ import {
   Coordinates,
   BombDetails,
   SpoilDetails,
-  PlayerDeathCoordinates,
+  PlayerCoordinates,
 } from "@types";
 import { GAME_DURATION } from "@constants";
 import Lobby from "./lobby";
@@ -51,11 +51,14 @@ class Play {
     return runningGames.get(game_id);
   }
 
-  updatePlayerPosition(coordinates: Coordinates) {
+  updatePlayerPosition({ x, y, playerId }: PlayerCoordinates) {
+    const coordinates = { x, y };
+
+    console.log("coordinates:", coordinates);
     if (this.socket_game_id) {
       this.broadcast
         .to(this.socket_game_id)
-        .emit("move player", { player_id: this.id, ...coordinates });
+        .emit("move player", { player_id: playerId, ...coordinates });
     }
   }
 
@@ -127,7 +130,7 @@ class Play {
     }
   }
 
-  onPlayerDied({ x, y, playerId }: PlayerDeathCoordinates) {
+  onPlayerDied({ x, y, playerId }: PlayerCoordinates) {
     if (!this.socket_game_id) return;
 
     const coordinates = { x, y };

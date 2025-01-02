@@ -98,8 +98,8 @@ const start = async () => {
       client.on("start game", (game_id: string) =>
         playerPlayInstance.onStartGame(game_id)
       );
-      client.on("update player position", (coordinates) =>
-        playerPlayInstance.updatePlayerPosition(coordinates)
+      client.on("update player position", (data) =>
+        playerPlayInstance.updatePlayerPosition(data)
       );
       client.on("create bomb", (bombDetails) =>
         playerPlayInstance.createBomb(bombDetails)
@@ -107,9 +107,7 @@ const start = async () => {
       client.on("pick up spoil", (spoilDetails) =>
         playerPlayInstance.onPickUpSpoil(spoilDetails)
       );
-      client.on("player died", (deathCoordinates) =>
-        playerPlayInstance.onPlayerDied(deathCoordinates)
-      );
+      client.on("player died", (data) => playerPlayInstance.onPlayerDied(data));
       client.on("leave game", () => playerPlayInstance.onLeaveGame());
 
       client.on("joinRoom", (req) => {
