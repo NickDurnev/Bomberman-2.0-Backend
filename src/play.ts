@@ -3,7 +3,7 @@ import {
   Coordinates,
   BombDetails,
   SpoilDetails,
-  PlayerCoordinates,
+  PlayerPositionData,
 } from "@types";
 import { GAME_DURATION } from "@constants";
 import Lobby from "./lobby";
@@ -51,15 +51,12 @@ class Play {
     return runningGames.get(game_id);
   }
 
-  updatePlayerPosition({ x, y, playerId }: PlayerCoordinates) {
+  updatePlayerPosition({ x, y, playerId, gameId }: PlayerPositionData) {
     const coordinates = { x, y };
 
-    console.log("coordinates:", coordinates);
-    if (this.socket_game_id) {
-      this.broadcast
-        .to(this.socket_game_id)
-        .emit("move player", { player_id: playerId, ...coordinates });
-    }
+    this.broadcast
+      .to(gameId)
+      .emit("move player", { player_id: playerId, ...coordinates });
   }
 
   onDisconnectFromGame() {
@@ -74,10 +71,7 @@ class Play {
     }
   }
 
-  createBomb({ col, row, playerId }: BombDetails) {
-    if (!this.socket_game_id) return;
-
-    const gameId = this.socket_game_id;
+  createBomb({ col, row, playerId, gameId }: BombDetails) {
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
@@ -106,10 +100,7 @@ class Play {
     }
   }
 
-  onPickUpSpoil({ spoil_id, playerId }: SpoilDetails) {
-    if (!this.socket_game_id) return;
-
-    const gameId = this.socket_game_id;
+  onPickUpSpoil({ spoil_id, playerId, gameId }: SpoilDetails) {
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
@@ -130,16 +121,13 @@ class Play {
     }
   }
 
-  onPlayerDied({ x, y, playerId }: PlayerCoordinates) {
-    if (!this.socket_game_id) return;
-
+  onPlayerDied({ x, y, playerId, gameId }: PlayerPositionData) {
     const coordinates = { x, y };
 
     serverSocket.sockets
-      .to(this.socket_game_id)
+      .to(gameId)
       .emit("show bones", { player_id: playerId, ...coordinates });
 
-    const gameId = this.socket_game_id;
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 

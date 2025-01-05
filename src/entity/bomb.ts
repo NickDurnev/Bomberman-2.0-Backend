@@ -60,7 +60,6 @@ export class Bomb {
         const currentCol = col + direction.x * i;
 
         const cell = this.game.getMapCell(currentRow, currentCol);
-        console.log("cell:", cell);
         const isWall = cell === NON_DESTRUCTIBLE_CELL;
         const isBox = cell === DESTRUCTIBLE_CELL;
         const isLast = i === power;

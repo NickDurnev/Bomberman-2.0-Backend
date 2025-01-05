@@ -20,7 +20,7 @@ const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
 const server = http.createServer(app);
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 export const serverSocket = new Server(server, {
   cors: {
     origin: "*",
@@ -31,22 +31,18 @@ export const serverSocket = new Server(server, {
 app.use(express.static(path.join(__dirname, "..", "client")));
 
 app.get("/", (req, res) => {
-  console.log("Socket listening on :4000");
   res.sendStatus(200);
 });
 
 app.use("/api/v1", router);
 
-server.listen(4000, () => {
-  console.log("Socket listening on :4000");
-  console.log(process.env.APP_URL);
-});
-
 const start = async () => {
   try {
     await connection();
 
-    app.listen(PORT, () => console.log("Database connection successful"));
+    server.listen(PORT, () => {
+      console.log(`Server listening on port ${PORT}`);
+    });
 
     serverSocket.sockets.on("connection", (client: CustomSocket) => {
       console.log(`New player has connected: ${client.id}`);

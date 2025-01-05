@@ -38,6 +38,7 @@ export class Game {
 
   constructor({ mapName, gameName }: NewGamePayload) {
     this.id = uuidv4();
+    console.log("this.id:", this.id);
     this.name = gameName;
     this.mapName = mapName;
     this.layer_info = require(`../maps/${this.mapName}.json`)
