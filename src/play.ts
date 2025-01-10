@@ -1,10 +1,6 @@
+import { v4 as uuidv4 } from "uuid";
 import { Game } from "@entity/game";
-import {
-  Coordinates,
-  BombDetails,
-  SpoilDetails,
-  PlayerPositionData,
-} from "@types";
+import { UserDetails, SpoilDetails, PlayerPositionData } from "@types";
 import { GAME_DURATION } from "@constants";
 import Lobby from "./lobby";
 import { serverSocket } from "./app";
@@ -71,7 +67,7 @@ class Play {
     }
   }
 
-  createBomb({ col, row, playerId, gameId }: BombDetails) {
+  createBomb({ col, row, playerId, gameId }: UserDetails) {
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
@@ -121,15 +117,17 @@ class Play {
     }
   }
 
-  onPlayerDied({ x, y, playerId, gameId }: PlayerPositionData) {
-    const coordinates = { x, y };
+  onPlayerDied({ col, row, playerId, gameId }: UserDetails) {
+    const currentGame = runningGames.get(gameId);
+    if (!currentGame) return; // Type check to ensure `currentGame` is defined
+
+    const tombId = uuidv4();
+
+    currentGame.addTombStone({ tombId, row, col });
 
     serverSocket.sockets
       .to(gameId)
-      .emit("show bones", { player_id: playerId, ...coordinates });
-
-    const currentGame = runningGames.get(gameId);
-    if (!currentGame) return; // Type check to ensure `currentGame` is defined
+      .emit("show tombstone", { player_id: playerId, tombId, col, row });
 
     const currentPlayer = currentGame.players.find(
       (player) => player.id === playerId

@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import Play from "./play";
 
 export type Coordinates = { x: number; y: number };
-export type BombDetails = {
+export type UserDetails = {
   col: number;
   row: number;
   playerId: string;

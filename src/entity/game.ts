@@ -9,6 +9,7 @@ import {
 } from "../constants";
 import Player from "./player";
 import { Bomb } from "./bomb";
+import { Spoil } from "./spoil";
 
 // Assuming the type structure of `layer_info` from the map JSON file
 interface LayerInfo {
@@ -33,23 +34,23 @@ export class Game {
   players: Player[];
   playerSpawns: { row: number; col: number }[];
   shadow_map: number[][];
-  spoils: Map<string, any>;
+  spoils: Map<string, Spoil>;
   bombs: Map<string, Bomb>;
+  tombstones: Map<string, { row: number; col: number }>;
 
   constructor({ mapName, gameName }: NewGamePayload) {
     this.id = uuidv4();
-    console.log("this.id:", this.id);
     this.name = gameName;
     this.mapName = mapName;
     this.layer_info = require(`../maps/${this.mapName}.json`)
       .layers[0] as LayerInfo;
     this.max_players = this.layer_info.properties.max_players;
     this.players = [];
-    console.log("this.players:", this.players);
     this.playerSpawns = [...this.layer_info.properties.spawns];
     this.shadow_map = this.createMapData();
     this.spoils = new Map();
     this.bombs = new Map();
+    this.tombstones = new Map();
   }
 
   async addPlayer(id: string) {
@@ -164,6 +165,18 @@ export class Game {
 
   addSpoil(spoil: any) {
     this.spoils.set(spoil.id, spoil);
+  }
+
+  addTombStone({
+    tombId,
+    row,
+    col,
+  }: {
+    tombId: string;
+    row: number;
+    col: number;
+  }) {
+    this.tombstones.set(tombId, { row, col });
   }
 
   deleteSpoil(spoil_id: string) {
