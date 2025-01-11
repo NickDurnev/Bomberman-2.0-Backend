@@ -3,6 +3,7 @@ import { Game } from "@entity/game";
 import { UserDetails, SpoilDetails, PlayerPositionData } from "@types";
 import { GAME_DURATION } from "@constants";
 import Lobby from "./lobby";
+import Player from "./entity/player";
 import { serverSocket } from "./app";
 
 const runningGames: Map<string, Game> = new Map();
@@ -20,6 +21,7 @@ class Play {
   }
 
   onLeaveGame() {
+    console.log("LEAVE_GAME: this.socket_game_id:", this.socket_game_id);
     if (this.socket_game_id) {
       runningGames.delete(this.socket_game_id);
 
@@ -37,9 +39,14 @@ class Play {
     console.log(`Game ${game.id} has started...`);
 
     setTimeout(() => {
+      runningGames.delete(game.id);
+
+      serverSocket.sockets.to(game.id).emit("end game", {
+        game_id: game.id,
+      });
+
       console.log(`Game ${game.id} has finished...`);
-      //TODO ADD finish game socket emit to all players in the game room
-    }, GAME_DURATION);
+    }, GAME_DURATION * 1000);
     serverSocket.sockets.in(game.id).emit("launch game", game);
   }
 
@@ -135,18 +142,18 @@ class Play {
     currentPlayer?.dead();
 
     let alivePlayersCount = 0;
-    let alivePlayerSkin: string | null = null;
+    let alivePlayer: Player | null = null;
 
     for (const player of Object.values(currentGame.players)) {
       if (player.isAlive) {
         alivePlayersCount += 1;
-        alivePlayerSkin = player.skin;
+        alivePlayer = player;
       }
     }
 
-    if (alivePlayersCount < 2 && alivePlayerSkin) {
+    if (alivePlayersCount < 2 && alivePlayer) {
       setTimeout(() => {
-        serverSocket.sockets.to(gameId).emit("player win", alivePlayerSkin);
+        serverSocket.sockets.to(gameId).emit("player win", alivePlayer);
       }, 3000);
     }
   }
