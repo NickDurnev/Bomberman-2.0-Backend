@@ -20,7 +20,7 @@ const app = express();
 app.use(cors(corsOptions));
 app.use(express.json());
 const server = http.createServer(app);
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT ?? 4000;
 export const serverSocket = new Server(server, {
   cors: {
     origin: "*",
@@ -106,13 +106,13 @@ const start = async () => {
       client.on("player died", (data) => playerPlayInstance.onPlayerDied(data));
       client.on("leave game", () => playerPlayInstance.onLeaveGame());
 
-      client.on("joinRoom", (req) => {
-        const { room_id } = req;
+      client.on("joinRoom", (data) => {
+        const { room_id } = data;
         client.join(room_id);
       });
 
-      client.on("leaveRoom", async (req) => {
-        const { room_id } = req;
+      client.on("leaveRoom", (data) => {
+        const { room_id } = data;
         client.leave(room_id);
       });
 

@@ -26,8 +26,7 @@ const Lobby = {
     { mapName, gameName }: NewGamePayload,
     callback: (data: { game_id: string }) => void
   ) {
-    const newGame = new Game({ mapName, gameName });
-    pendingGames.set(newGame.id, newGame);
+    const newGame = Lobby.createPendingGame({ mapName, gameName });
 
     // Update the lobby games list
     Lobby.updateLobbyGames();
@@ -74,6 +73,12 @@ const Lobby = {
 
       Lobby.updateCurrentGame(current_game);
     }
+  },
+
+  createPendingGame({ mapName, gameName }: NewGamePayload) {
+    const newGame = new Game({ mapName, gameName });
+    pendingGames.set(newGame.id, newGame);
+    return newGame;
   },
 
   deletePendingGame(game_id: string) {

@@ -38,20 +38,38 @@ class Play {
     runningGames.set(game.id, game);
     console.log(`Game ${game.id} has started...`);
 
-    setTimeout(() => {
-      runningGames.delete(game.id);
-
-      serverSocket.sockets.to(game.id).emit("end game", {
-        game_id: game.id,
-      });
-
-      console.log(`Game ${game.id} has finished...`);
-    }, GAME_DURATION * 1000);
+    this.endGame({
+      game_id: game.id,
+      mapName: game.mapName,
+      delay: GAME_DURATION,
+    });
     serverSocket.sockets.in(game.id).emit("launch game", game);
   }
 
   onGetCurrentGame(game_id: string) {
     return runningGames.get(game_id);
+  }
+
+  endGame({
+    game_id,
+    mapName,
+    delay,
+  }: {
+    game_id: string;
+    mapName: string;
+    delay: number;
+  }) {
+    setTimeout(() => {
+      const newGame = Lobby.createPendingGame({ mapName, gameName: uuidv4() });
+      runningGames.delete(game_id);
+
+      serverSocket.sockets.to(game_id).emit("end game", {
+        game_id: game_id,
+        new_game_id: newGame.id,
+      });
+
+      console.log(`Game ${game_id} has finished...`);
+    }, delay * 1000);
   }
 
   updatePlayerPosition({ x, y, playerId, gameId }: PlayerPositionData) {
@@ -155,6 +173,7 @@ class Play {
       setTimeout(() => {
         serverSocket.sockets.to(gameId).emit("player win", alivePlayer);
       }, 3000);
+      this.endGame({ game_id: gameId, mapName: currentGame.mapName, delay: 6 });
     }
   }
 }

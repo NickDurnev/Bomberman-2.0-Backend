@@ -15,4 +15,4 @@ export const NON_DESTRUCTIBLE_CELL = 1;
 export const INITIAL_POWER = 1;
 export const STEP_POWER = 1;
 
-export const GAME_DURATION = 180; // 3 minutes
+export const GAME_DURATION = 10; // 3 minutes
