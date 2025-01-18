@@ -21,7 +21,6 @@ class Play {
   }
 
   onLeaveGame() {
-    console.log("LEAVE_GAME: this.socket_game_id:", this.socket_game_id);
     if (this.socket_game_id) {
       runningGames.delete(this.socket_game_id);
 
@@ -32,6 +31,7 @@ class Play {
 
   onStartGame(game_id: string) {
     this.socket_game_id = game_id;
+    console.log("runningGames:", runningGames);
 
     const game = Lobby.deletePendingGame(this.socket_game_id);
     if (!game) return; // Type check to ensure `game` is defined
@@ -41,6 +41,7 @@ class Play {
     this.endGame({
       game_id: game.id,
       mapName: game.mapName,
+      gameName: game.name,
       delay: GAME_DURATION,
     });
     serverSocket.sockets.in(game.id).emit("launch game", game);
@@ -53,14 +54,16 @@ class Play {
   endGame({
     game_id,
     mapName,
+    gameName,
     delay,
   }: {
     game_id: string;
     mapName: string;
+    gameName: string;
     delay: number;
   }) {
     setTimeout(() => {
-      const newGame = Lobby.createPendingGame({ mapName, gameName: uuidv4() });
+      const newGame = Lobby.createPendingGame({ mapName, gameName });
       runningGames.delete(game_id);
 
       serverSocket.sockets.to(game_id).emit("end game", {
@@ -143,6 +146,8 @@ class Play {
   }
 
   onPlayerDied({ col, row, playerId, gameId }: UserDetails) {
+    console.log("row:", row);
+    console.log("col:", col);
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
@@ -173,7 +178,15 @@ class Play {
       setTimeout(() => {
         serverSocket.sockets.to(gameId).emit("player win", alivePlayer);
       }, 3000);
-      this.endGame({ game_id: gameId, mapName: currentGame.mapName, delay: 6 });
+    }
+
+    if (!alivePlayersCount) {
+      this.endGame({
+        game_id: gameId,
+        mapName: currentGame.mapName,
+        gameName: currentGame.name,
+        delay: 0,
+      });
     }
   }
 }
