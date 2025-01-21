@@ -64,11 +64,13 @@ class Play {
   }) {
     setTimeout(() => {
       const newGame = Lobby.createPendingGame({ mapName, gameName });
+      const prevGameInfo = runningGames.get(game_id);
       runningGames.delete(game_id);
 
       serverSocket.sockets.to(game_id).emit("end game", {
         game_id: game_id,
         new_game_id: newGame.id,
+        prevGameInfo,
       });
 
       console.log(`Game ${game_id} has finished...`);
@@ -114,13 +116,17 @@ class Play {
 
         serverSocket.sockets.to(gameId).emit("detonate bomb", {
           bomb_id: bomb.id,
+          playerId,
           blastedCells,
         });
       }, bomb.explosion_time);
 
-      serverSocket.sockets
-        .to(gameId)
-        .emit("show bomb", { bomb_id: bomb.id, col: bomb.col, row: bomb.row });
+      serverSocket.sockets.to(gameId).emit("show bomb", {
+        bomb_id: bomb.id,
+        playerId,
+        col: bomb.col,
+        row: bomb.row,
+      });
     }
   }
 
@@ -145,9 +151,7 @@ class Play {
     }
   }
 
-  onPlayerDied({ col, row, playerId, gameId }: UserDetails) {
-    console.log("row:", row);
-    console.log("col:", col);
+  onPlayerDied({ col, row, playerId, gameId, killerId }: UserDetails) {
     const currentGame = runningGames.get(gameId);
     if (!currentGame) return; // Type check to ensure `currentGame` is defined
 
@@ -164,6 +168,11 @@ class Play {
     );
     currentPlayer?.dead();
 
+    const currentKiller = currentGame.players.find(
+      (player) => player.id === killerId
+    );
+    currentKiller?.kill();
+
     let alivePlayersCount = 0;
     let alivePlayer: Player | null = null;
 
@@ -177,7 +186,13 @@ class Play {
     if (alivePlayersCount < 2 && alivePlayer) {
       setTimeout(() => {
         serverSocket.sockets.to(gameId).emit("player win", alivePlayer);
-      }, 3000);
+      }, 1000);
+      this.endGame({
+        game_id: gameId,
+        mapName: currentGame.mapName,
+        gameName: currentGame.name,
+        delay: 5,
+      });
     }
 
     if (!alivePlayersCount) {

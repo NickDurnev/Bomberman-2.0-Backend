@@ -7,6 +7,7 @@ export type UserDetails = {
   row: number;
   playerId: string;
   gameId: string;
+  killerId?: string;
 };
 export type SpoilDetails = {
   spoil_id: string;

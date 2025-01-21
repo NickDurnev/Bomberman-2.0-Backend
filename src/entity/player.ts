@@ -8,6 +8,7 @@ class Player {
   spawnOnGrid: SpawnOnGrid;
   isAlive: boolean;
   power: number;
+  kills: number;
 
   constructor({ id, skin, name, spawn, spawnOnGrid }: IPlayer) {
     this.id = id;
@@ -18,12 +19,17 @@ class Player {
 
     this.isAlive = true;
     this.power = INITIAL_POWER;
+    this.kills = 0;
   }
 
   pickSpoil(spoil_type: number) {
     if (spoil_type === POWER) {
       this.power += STEP_POWER;
     }
+  }
+
+  kill() {
+    this.kills += 1;
   }
 
   dead() {
