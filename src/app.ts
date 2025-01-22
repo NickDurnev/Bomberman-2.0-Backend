@@ -91,6 +91,9 @@ const start = async () => {
           callback(game); // Send the game data back to the client
         }
       );
+      client.on("start timer", (game_id: string) =>
+        playerPlayInstance.onStartTimer(game_id)
+      );
       client.on("start game", (game_id: string) =>
         playerPlayInstance.onStartGame(game_id)
       );

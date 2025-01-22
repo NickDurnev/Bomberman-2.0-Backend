@@ -29,9 +29,13 @@ class Play {
     }
   }
 
+  onStartTimer(game_id: string) {
+    this.socket_game_id = game_id;
+    serverSocket.sockets.in(game_id).emit("start timer");
+  }
+
   onStartGame(game_id: string) {
     this.socket_game_id = game_id;
-    console.log("runningGames:", runningGames);
 
     const game = Lobby.deletePendingGame(this.socket_game_id);
     if (!game) return; // Type check to ensure `game` is defined
