@@ -182,4 +182,8 @@ export class Game {
   deleteSpoil(spoil_id: string) {
     this.spoils.delete(spoil_id);
   }
+
+  deleteBomb(bomb_id: string) {
+    this.bombs.delete(bomb_id);
+  }
 }

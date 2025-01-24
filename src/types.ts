@@ -1,22 +1,32 @@
 import { Socket } from "socket.io";
 import Play from "./play";
 
+type PlayerId = string;
+type GameId = string;
+
 export type Coordinates = { x: number; y: number };
 export type UserDetails = {
   col: number;
   row: number;
-  playerId: string;
-  gameId: string;
+  playerId: PlayerId;
+  gameId: GameId;
   killerId?: string;
 };
 export type SpoilDetails = {
   spoil_id: string;
-  playerId: string;
-  gameId: string;
+  playerId: PlayerId;
+  gameId: GameId;
 };
+
+export type BombDetails = {
+  bomb_id: string;
+  playerId: PlayerId;
+  gameId: GameId;
+};
+
 export type PlayerPositionData = Coordinates & {
-  playerId: string;
-  gameId: string;
+  playerId: PlayerId;
+  gameId: GameId;
 };
 
 export type Spawn = {

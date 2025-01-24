@@ -103,6 +103,9 @@ const start = async () => {
       client.on("create bomb", (bombDetails) =>
         playerPlayInstance.createBomb(bombDetails)
       );
+      client.on("detonate bomb by blast", (bombDetails) =>
+        playerPlayInstance.onBlastVsBomb(bombDetails)
+      );
       client.on("pick up spoil", (spoilDetails) =>
         playerPlayInstance.onPickUpSpoil(spoilDetails)
       );

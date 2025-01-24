@@ -1,6 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
 import { Game } from "@entity/game";
-import { UserDetails, SpoilDetails, PlayerPositionData } from "@types";
+import {
+  UserDetails,
+  SpoilDetails,
+  PlayerPositionData,
+  BombDetails,
+} from "@types";
 import { GAME_DURATION } from "@constants";
 import Lobby from "./lobby";
 import Player from "./entity/player";
@@ -116,13 +121,7 @@ class Play {
 
     if (bomb) {
       setTimeout(() => {
-        const blastedCells = bomb.detonate();
-
-        serverSocket.sockets.to(gameId).emit("detonate bomb", {
-          bomb_id: bomb.id,
-          playerId,
-          blastedCells,
-        });
+        this.detonateBomb({ bomb_id: bomb.id, playerId, gameId });
       }, bomb.explosion_time);
 
       serverSocket.sockets.to(gameId).emit("show bomb", {
@@ -134,9 +133,30 @@ class Play {
     }
   }
 
+  detonateBomb({ bomb_id, playerId, gameId }: BombDetails) {
+    const currentGame = runningGames.get(gameId);
+    if (!currentGame) return;
+
+    const bomb = currentGame.bombs.get(bomb_id);
+    if (bomb) {
+      const blastedCells = bomb.detonate();
+      currentGame.deleteBomb(bomb_id);
+
+      serverSocket.sockets.to(gameId).emit("detonate bomb", {
+        bomb_id: bomb.id,
+        playerId,
+        blastedCells,
+      });
+    }
+  }
+
+  onBlastVsBomb({ bomb_id, playerId, gameId }: BombDetails) {
+    this.detonateBomb({ bomb_id, playerId, gameId });
+  }
+
   onPickUpSpoil({ spoil_id, playerId, gameId }: SpoilDetails) {
     const currentGame = runningGames.get(gameId);
-    if (!currentGame) return; // Type check to ensure `currentGame` is defined
+    if (!currentGame) return;
 
     const currentPlayer = currentGame.players.find(
       (player) => player.id === playerId
@@ -157,7 +177,7 @@ class Play {
 
   onPlayerDied({ col, row, playerId, gameId, killerId }: UserDetails) {
     const currentGame = runningGames.get(gameId);
-    if (!currentGame) return; // Type check to ensure `currentGame` is defined
+    if (!currentGame) return;
 
     const tombId = uuidv4();
 
