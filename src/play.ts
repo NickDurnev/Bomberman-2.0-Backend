@@ -195,7 +195,7 @@ class Play {
     const currentKiller = currentGame.players.find(
       (player) => player.id === killerId
     );
-    currentKiller?.kill();
+    currentKiller?.kill(playerId);
 
     let alivePlayersCount = 0;
     let alivePlayer: Player | null = null;
@@ -208,9 +208,9 @@ class Play {
     }
 
     if (alivePlayersCount < 2 && alivePlayer) {
-      setTimeout(() => {
-        serverSocket.sockets.to(gameId).emit("player win", alivePlayer);
-      }, 1000);
+      serverSocket.sockets
+        .to(gameId)
+        .emit("player win", { winner: alivePlayer, prevGameInfo: currentGame });
       this.endGame({
         game_id: gameId,
         mapName: currentGame.mapName,

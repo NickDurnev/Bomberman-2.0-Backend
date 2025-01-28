@@ -2,11 +2,12 @@ import { connection } from "../db";
 import User from "@db/models/User";
 
 export async function login(req: any, res: any) {
-  const { email } = req.body;
+  const { email, picture } = req.body;
   await connection();
   try {
     const user = await User.findOne({ email });
     if (user) {
+      await User.findOneAndUpdate({ email }, { picture });
       res.json({
         status: "success",
         code: 200,
