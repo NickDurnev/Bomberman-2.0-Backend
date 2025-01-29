@@ -81,6 +81,7 @@ const start = async () => {
       client.on("create game", Lobby.onCreateGame);
       client.on("enter pending game", Lobby.onEnterPendingGame);
       client.on("leave pending game", Lobby.onLeavePendingGame);
+      client.on("check game name", Lobby.onCheckNameAvailable);
 
       // Play event handlers using the `Play` instance
       client.on(

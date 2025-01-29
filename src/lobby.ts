@@ -96,6 +96,17 @@ const Lobby = {
     return Array.from(pendingGames.values()).filter((game) => !game.isFull());
   },
 
+  onCheckNameAvailable(
+    gameName: string,
+    callback: (data: { isAvailable: boolean }) => void
+  ) {
+    const isAvailable = !Array.from(pendingGames.values()).some((game) => {
+      return game.name === gameName;
+    });
+
+    callback({ isAvailable });
+  },
+
   updateLobbyGames() {
     serverSocket.sockets
       .in(lobbyId)
