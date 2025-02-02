@@ -207,6 +207,12 @@ class Play {
       }
     }
 
+    if (alivePlayersCount === 3) {
+      currentGame.players.forEach((player) => {
+        player.top3();
+      });
+    }
+
     if (alivePlayersCount < 2 && alivePlayer) {
       serverSocket.sockets
         .to(gameId)

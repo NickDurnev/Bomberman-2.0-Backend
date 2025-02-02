@@ -8,6 +8,7 @@ class Player {
   spawnOnGrid: SpawnOnGrid;
   isAlive: boolean;
   power: number;
+  isTop3: boolean;
   kills: string[];
 
   constructor({ id, skin, name, spawn, spawnOnGrid }: IPlayer) {
@@ -18,6 +19,7 @@ class Player {
     this.spawnOnGrid = spawnOnGrid;
 
     this.isAlive = true;
+    this.isTop3 = false;
     this.power = INITIAL_POWER;
     this.kills = [];
   }
@@ -34,6 +36,10 @@ class Player {
 
   dead() {
     this.isAlive = false;
+  }
+
+  top3() {
+    this.isTop3 = true;
   }
 }
 

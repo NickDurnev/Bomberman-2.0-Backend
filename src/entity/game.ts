@@ -76,6 +76,12 @@ export class Game {
     this.players.push(player);
   }
 
+  async processStats() {
+    for (const player of this.players) {
+      await player.processStats();
+    }
+  }
+
   removePlayer(id: string) {
     const player = this.players.find((player) => player.id === id);
     if (player) {

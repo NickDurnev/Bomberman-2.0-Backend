@@ -16,3 +16,7 @@ export const INITIAL_POWER = 1;
 export const STEP_POWER = 1;
 
 export const GAME_DURATION = 180; // 3 minutes
+
+export const POINTS_PER_KILL = 1;
+export const POINTS_PER_WIN = 3;
+export const POINTS_PER_TOP3 = 1;
