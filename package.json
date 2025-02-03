@@ -4,9 +4,19 @@
   "description": "Bomberman 2.0 backend server",
   "main": "server.js",
   "scripts": {
-    "start": "node dist/src/app.js",
+    "start": "node dist/app.js",
     "build": "npx tsc",
+    "postbuild": "copyfiles -u 1 src/maps/* dist",
     "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/app.ts"
+  },
+  "_moduleAliases": {
+    "@services": "./dist/services",
+    "@entity": "./dist/entity",
+    "@routes": "./dist/routes",
+    "@middlewares": "./dist/middlewares",
+    "@db": "./dist/db",
+    "@types": "./dist/types",
+    "@constants": "./dist/constants"
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +26,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "joi": "^17.13.3",
+    "module-alias": "^2.2.3",
     "mongoose": "^8.5.1",
     "p2": "^0.7.1",
     "socket.io": "^4.8.1",
@@ -29,6 +40,7 @@
     "@types/socket.io": "^3.0.2",
     "@types/uuid": "^10.0.0",
     "concurrently": "^9.1.0",
+    "copyfiles": "^2.4.1",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"

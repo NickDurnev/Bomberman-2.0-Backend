@@ -7,6 +7,7 @@ const StatsSchema = new Schema(
     kills: { type: Number, default: 0 },
     wins: { type: Number, default: 0 },
     games: { type: Number, default: 0 },
+    top3: { type: Number, default: 0 },
   },
   { versionKey: false }
 );

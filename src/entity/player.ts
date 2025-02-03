@@ -1,5 +1,13 @@
-import { POWER, INITIAL_POWER, STEP_POWER } from "../constants";
+import {
+  POWER,
+  INITIAL_POWER,
+  STEP_POWER,
+  POINTS_PER_KILL,
+  POINTS_PER_WIN,
+  POINTS_PER_TOP3,
+} from "../constants";
 import { Spawn, SpawnOnGrid, Player as IPlayer } from "@types";
+import { updatePlayerStats } from "@services/stats";
 class Player {
   id: string;
   skin: string;
@@ -31,6 +39,7 @@ class Player {
   }
 
   kill(playerId: string) {
+    if (this.id === playerId) return;
     this.kills.push(playerId);
   }
 
@@ -40,6 +49,20 @@ class Player {
 
   top3() {
     this.isTop3 = true;
+  }
+
+  async processStats(isWin: boolean) {
+    const pointsPerTop3 = this.isTop3 ? POINTS_PER_TOP3 : 0;
+    const pointsPerWin = isWin ? POINTS_PER_WIN : 0;
+    const points =
+      this.kills.length * POINTS_PER_KILL + pointsPerTop3 + pointsPerWin;
+    await updatePlayerStats({
+      userId: this.id,
+      points,
+      isWin,
+      kills: this.kills.length,
+      isTop3: this.isTop3,
+    });
   }
 }
 

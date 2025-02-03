@@ -11,6 +11,15 @@ import Lobby from "./lobby";
 import Player from "./entity/player";
 import { serverSocket } from "./app";
 
+type EndGameArgs = {
+  game_id: string;
+  mapName: string;
+  gameName: string;
+  delay: number;
+  winnerId?: string | null;
+  isProcessStats?: boolean;
+};
+
 const runningGames: Map<string, Game> = new Map();
 
 class Play {
@@ -52,6 +61,7 @@ class Play {
       mapName: game.mapName,
       gameName: game.name,
       delay: GAME_DURATION,
+      isProcessStats: false,
     });
     serverSocket.sockets.in(game.id).emit("launch game", game);
   }
@@ -60,26 +70,29 @@ class Play {
     return runningGames.get(game_id);
   }
 
-  endGame({
+  async endGame({
     game_id,
     mapName,
     gameName,
+    winnerId = null,
+    isProcessStats = true,
     delay,
-  }: {
-    game_id: string;
-    mapName: string;
-    gameName: string;
-    delay: number;
-  }) {
+  }: EndGameArgs) {
+    const currentGame = runningGames.get(game_id);
+    if (!currentGame) return;
+
+    if (isProcessStats) {
+      await currentGame.processGameStats(winnerId);
+    }
+
     setTimeout(() => {
       const newGame = Lobby.createPendingGame({ mapName, gameName });
-      const prevGameInfo = runningGames.get(game_id);
       runningGames.delete(game_id);
 
       serverSocket.sockets.to(game_id).emit("end game", {
         game_id: game_id,
         new_game_id: newGame.id,
-        prevGameInfo,
+        prevGameInfo: currentGame,
       });
 
       console.log(`Game ${game_id} has finished...`);
@@ -108,7 +121,7 @@ class Play {
 
   createBomb({ col, row, playerId, gameId }: UserDetails) {
     const currentGame = runningGames.get(gameId);
-    if (!currentGame) return; // Type check to ensure `currentGame` is defined
+    if (!currentGame) return;
 
     const currentPlayer = currentGame.players.find(
       (player) => player.id === playerId
@@ -221,6 +234,7 @@ class Play {
         game_id: gameId,
         mapName: currentGame.mapName,
         gameName: currentGame.name,
+        winnerId: alivePlayer.id,
         delay: 5,
       });
     }

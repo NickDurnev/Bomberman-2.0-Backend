@@ -76,9 +76,11 @@ export class Game {
     this.players.push(player);
   }
 
-  async processStats() {
+  async processGameStats(winnerId: string | null = null) {
     for (const player of this.players) {
-      await player.processStats();
+      console.log("player:", player);
+      const isWin = player.id === winnerId;
+      await player.processStats(isWin);
     }
   }
 

@@ -6,6 +6,7 @@ type updatePlayerArgs = {
   kills: number;
   isWin: boolean;
   points: number;
+  isTop3: boolean;
 };
 
 type getPlayersArgs = {
@@ -27,16 +28,26 @@ export const updatePlayerStats = async ({
   kills = 0,
   isWin = false,
   points = 0,
+  isTop3 = false,
 }: updatePlayerArgs) => {
   connection();
   try {
     const player = await PlayStats.findOne({ userId });
+    console.log("player:", player);
     if (player) {
+      console.log("update player");
       await PlayStats.findOneAndUpdate(
         { userId },
-        { $inc: { games: 1, points, kills, wins: isWin } }
+        {
+          $inc: { games: 1, points, kills },
+          $set: {
+            wins: isWin ? player.wins + 1 : player.wins,
+            top3: isTop3 ? player.top3 + 1 : player.top3,
+          },
+        }
       );
     } else {
+      console.log("new player");
       await PlayStats.create({
         userId,
         points,
