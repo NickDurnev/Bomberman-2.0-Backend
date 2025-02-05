@@ -12,9 +12,7 @@ type updatePlayerArgs = {
 type getPlayersArgs = {
   skip: number;
   limit: number;
-  filter: {
-    [key: string]: string;
-  };
+  sort: string;
 };
 
 type getByNameArgs = {
@@ -30,12 +28,10 @@ export const updatePlayerStats = async ({
   points = 0,
   isTop3 = false,
 }: updatePlayerArgs) => {
-  connection();
+  await connection();
   try {
     const player = await PlayStats.findOne({ userId });
-    console.log("player:", player);
     if (player) {
-      console.log("update player");
       await PlayStats.findOneAndUpdate(
         { userId },
         {
@@ -47,7 +43,6 @@ export const updatePlayerStats = async ({
         }
       );
     } else {
-      console.log("new player");
       await PlayStats.create({
         userId,
         points,
@@ -61,18 +56,26 @@ export const updatePlayerStats = async ({
   }
 };
 
-export const get = async ({ skip, limit, filter }: getPlayersArgs) => {
-  const stats = await PlayStats.find({ ...filter })
-    .select({ __v: 0 })
-    .skip(skip)
-    .limit(limit)
-    .sort({ name: 1 });
-  const total = await PlayStats.countDocuments({ ...filter });
-  return { stats, total };
+export const get = async ({ skip, limit, sort }: getPlayersArgs) => {
+  await connection();
+  try {
+    const stats = await PlayStats.find({})
+      .select({ __v: 0 })
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sort]: -1 });
+    const total = await PlayStats.countDocuments();
+    console.log("total:", total);
+    return { stats, total };
+  } catch (error) {
+    console.log(123);
+    console.log(error);
+    return { stats: [], total: 0 };
+  }
 };
 
 export const getByName = async ({ name, skip, limit }: getByNameArgs) => {
-  const contacts = await PlayStats.find({
+  const stats = await PlayStats.find({
     name: new RegExp(name, "i"),
   })
     .select({ __v: 0 })
@@ -82,7 +85,5 @@ export const getByName = async ({ name, skip, limit }: getByNameArgs) => {
   const total = await PlayStats.countDocuments({
     name: new RegExp(name, "i"),
   });
-  console.log(contacts);
-  console.log(total);
-  return { contacts, total };
+  return { stats, total };
 };
