@@ -1,5 +1,6 @@
 import { connection } from "../db";
 import PlayStats from "@db/models/PlayStats";
+import User from "@db/models/User";
 
 type updatePlayerArgs = {
   userId: string;
@@ -30,21 +31,23 @@ export const updatePlayerStats = async ({
 }: updatePlayerArgs) => {
   await connection();
   try {
-    const player = await PlayStats.findOne({ userId });
-    if (player) {
+    const playerStats = await PlayStats.findOne({ userId });
+    if (playerStats) {
       await PlayStats.findOneAndUpdate(
         { userId },
         {
           $inc: { games: 1, points, kills },
           $set: {
-            wins: isWin ? player.wins + 1 : player.wins,
-            top3: isTop3 ? player.top3 + 1 : player.top3,
+            wins: isWin ? playerStats.wins + 1 : playerStats.wins,
+            top3: isTop3 ? playerStats.top3 + 1 : playerStats.top3,
           },
         }
       );
     } else {
+      const user = await User.findOne({ socketID: userId });
       await PlayStats.create({
         userId,
+        userName: user.name,
         points,
         kills,
         wins: isWin,
@@ -65,10 +68,8 @@ export const get = async ({ skip, limit, sort }: getPlayersArgs) => {
       .limit(limit)
       .sort({ [sort]: -1 });
     const total = await PlayStats.countDocuments();
-    console.log("total:", total);
     return { stats, total };
   } catch (error) {
-    console.log(123);
     console.log(error);
     return { stats: [], total: 0 };
   }
@@ -76,14 +77,14 @@ export const get = async ({ skip, limit, sort }: getPlayersArgs) => {
 
 export const getByName = async ({ name, skip, limit }: getByNameArgs) => {
   const stats = await PlayStats.find({
-    name: new RegExp(name, "i"),
+    userName: new RegExp(name, "i"),
   })
     .select({ __v: 0 })
     .skip(skip)
     .limit(limit)
     .sort({ name: 1 });
   const total = await PlayStats.countDocuments({
-    name: new RegExp(name, "i"),
+    userName: new RegExp(name, "i"),
   });
   return { stats, total };
 };

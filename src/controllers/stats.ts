@@ -1,8 +1,6 @@
 import { get, getByName } from "@services/stats";
 
 export const getStats = async (req: any, res: any) => {
-  console.log("req.query:", req.query);
-
   const skip = Number(req.query.skip) || 0;
   const limit = Number(req.query.limit) || 10;
   const sort = req.query.sort ? String(req.query.sort) : "points";

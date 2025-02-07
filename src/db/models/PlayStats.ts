@@ -3,6 +3,7 @@ import { Schema, model, models } from "mongoose";
 const StatsSchema = new Schema(
   {
     userId: { type: String, required: true, unique: true },
+    userName: { type: String, required: true },
     points: { type: Number, default: 0 },
     kills: { type: Number, default: 0 },
     wins: { type: Number, default: 0 },
