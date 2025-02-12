@@ -22,6 +22,16 @@ type getByNameArgs = {
   limit: number;
 };
 
+export const deleteAllStats = async () => {
+  await connection();
+  try {
+    const result = await PlayStats.deleteMany({});
+    console.log(`Deleted ${result.deletedCount} stats records.`);
+  } catch (error) {
+    console.error("Error deleting stats records:", error);
+  }
+};
+
 export const updatePlayerStats = async ({
   userId,
   kills = 0,

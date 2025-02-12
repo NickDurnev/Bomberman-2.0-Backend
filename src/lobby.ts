@@ -62,9 +62,7 @@ const Lobby = {
       current_game.removePlayer(this.customId || "");
 
       if (current_game.isEmpty()) {
-        console.log("Game is empty");
-        pendingGames.delete(current_game.id);
-        Lobby.updateLobbyGames();
+        Lobby.deletePendingGame(current_game.id);
         return;
       }
 

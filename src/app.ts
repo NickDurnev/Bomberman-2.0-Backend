@@ -1,11 +1,13 @@
 require("module-alias/register");
 import express from "express";
+import cron from "node-cron";
 import cors from "cors";
 import { Server } from "socket.io";
 import http from "http";
 import path from "path";
 
 import { storeSocketID } from "@services/socket";
+import { deleteAllStats } from "@services/stats";
 import { CustomSocket } from "@types";
 import router from "./routes/index";
 import { connection } from "./db";
@@ -36,6 +38,12 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1", router);
+
+// Schedule the cron job to run at 3 AM on the first day of every month
+cron.schedule("0 3 1 * *", () => {
+  console.log("Running deleteAllStats cron job...");
+  deleteAllStats();
+});
 
 const start = async () => {
   try {
@@ -128,7 +136,6 @@ const start = async () => {
       client.on("disconnect", () => onClientDisconnect(client));
     });
 
-    // Refactor the `onClientDisconnect` function
     function onClientDisconnect(client: CustomSocket) {
       if (client.socket_game_id == null) {
         console.log("Player was not inside any game...");
