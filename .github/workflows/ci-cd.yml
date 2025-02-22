@@ -13,19 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Create .env file
-        run: |
-          touch .env
-          echo PORT=${{ secrets.PORT }} >> .env
-          echo DB_HOST=${{ secrets.DB_HOST }} >> .env
-          echo NODE_ENV=production >> .env
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.2.1
         with:
@@ -56,6 +43,12 @@ jobs:
 
             echo "Building the application..."
             npm run build
+
+            echo "Copying map files..."
+            mkdir -p dist  
+            if [ -d src/maps ]; then
+              npx copyfiles -u 1 src/maps/* dist
+            fi
 
             echo "Restarting application..."
             pm2 restart app

@@ -28,7 +28,11 @@ const db_1 = require("./db");
 const lobby_1 = __importDefault(require("./lobby"));
 const play_1 = __importDefault(require("./play"));
 const corsOptions = {
-    origin: "http://localhost:3000", // Replace with your frontend URL
+    origin: [
+        "http://localhost:3000",
+        "https://www.bomberman.click",
+        "https://dev.bomberman.click",
+    ],
     optionsSuccessStatus: 200,
 };
 const app = (0, express_1.default)();
