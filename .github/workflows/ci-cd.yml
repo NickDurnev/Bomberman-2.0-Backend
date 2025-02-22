@@ -33,13 +33,26 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            echo "Loading NVM..."
+            export NVM_DIR="$HOME/.nvm"
+            source "$NVM_DIR/nvm.sh"
+            nvm use 22.14.0 
+
             cd Bomberman-2.0-Backend
             git pull https://${{ secrets.USERNAME }}:${{ secrets.TOKEN }}@github.com/${{ secrets.USERNAME }}/Bomberman-2.0-Backend.git main            
+
+            echo "Updating environment variables..."
             cat <<EOF > .env
             PORT=${{ secrets.PORT }}
             DB_HOST=${{ secrets.DB_HOST }}
             NODE_ENV=production
             EOF
+
+            echo "Installing dependencies..."
             npm install --production
+
+            echo "Building the application..."
             npm run build
+
+            echo "Restarting application..."
             pm2 restart app
