@@ -74,9 +74,8 @@ const start = () => __awaiter(void 0, void 0, void 0, function* () {
             }));
             // Create a new Play instance and store it on the client object
             const playerPlayInstance = new play_1.default(client.id, (gameId) => {
-                client.leave(gameId); // Logic for leaving the game
-            }, exports.serverSocket.to(client.id) // Logic for broadcasting events
-            );
+                client.leave(gameId);
+            }, exports.serverSocket.to(client.id));
             // Store the Play instance on the client object
             client.playInstance = playerPlayInstance;
             // Lobby event handlers
