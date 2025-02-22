@@ -15,7 +15,11 @@ import Lobby from "./lobby";
 import Play from "./play";
 
 const corsOptions = {
-  origin: "http://localhost:3000", // Replace with your frontend URL
+  origin: [
+    "http://localhost:3000",
+    "https://www.bomberman.click",
+    "https://dev.bomberman.click",
+  ],
   optionsSuccessStatus: 200,
 };
 
