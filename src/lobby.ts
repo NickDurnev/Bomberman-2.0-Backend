@@ -1,5 +1,6 @@
 import { CustomSocket, NewGamePayload } from "@types";
 import { Game } from "./entity/game";
+import { LOBBY_TIMEOUT } from "./constants";
 import { serverSocket } from "./app";
 
 // Lobby Room ID
@@ -30,6 +31,12 @@ const Lobby = {
 
     // Update the lobby games list
     Lobby.updateLobbyGames();
+
+    setTimeout(() => {
+      if (newGame.isEmpty()) {
+        Lobby.deletePendingGame(newGame.id);
+      }
+    }, LOBBY_TIMEOUT * 1000);
 
     // Return the new game's ID
     callback({ game_id: newGame.id });

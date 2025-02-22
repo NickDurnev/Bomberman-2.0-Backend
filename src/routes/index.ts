@@ -6,11 +6,13 @@ import { getStats } from "../controllers/stats";
 const router = Router();
 
 router.get("/", (req: Request, res: Response) => {
-  res.send("Hello!");
+  res.send("Hello it's update!");
 });
 
 router.post("/auth", schemaValidator("/auth"), login);
 
 router.get("/stats", getStats);
+
+router.get("/getPendingGames");
 
 export default router;

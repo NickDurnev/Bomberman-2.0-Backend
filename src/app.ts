@@ -76,9 +76,9 @@ const start = async () => {
       const playerPlayInstance = new Play(
         client.id,
         (gameId: string) => {
-          client.leave(gameId); // Logic for leaving the game
+          client.leave(gameId);
         },
-        serverSocket.to(client.id) // Logic for broadcasting events
+        serverSocket.to(client.id)
       );
 
       // Store the Play instance on the client object
