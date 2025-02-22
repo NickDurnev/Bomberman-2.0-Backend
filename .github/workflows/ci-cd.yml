@@ -34,7 +34,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd Bomberman-2.0-Backend
-            git pull origin main
+            git pull https://${{ secrets.USERNAME }}:${{ secrets.TOKEN }}@github.com/${{ secrets.USERNAME }}/Bomberman-2.0-Backend.git main            
             cat <<EOF > .env
             PORT=${{ secrets.PORT }}
             DB_HOST=${{ secrets.DB_HOST }}
