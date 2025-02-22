@@ -33,7 +33,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /path/to/your/application
+            cd Bomberman-2.0-Backend
             git pull origin main
             cat <<EOF > .env
             PORT=${{ secrets.PORT }}
