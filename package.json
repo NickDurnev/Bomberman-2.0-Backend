@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node dist/app.js",
-    "build": "npm install --only=dev && tsc",
+    "build": "tsc",
     "postbuild": "copyfiles -u 1 src/maps/* dist",
     "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/app.ts"
   },
@@ -22,6 +22,7 @@
   "license": "ISC",
   "dependencies": {
     "ably": "^2.3.0",
+    "copyfiles": "^2.4.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -42,7 +43,6 @@
     "@types/socket.io": "^3.0.2",
     "@types/uuid": "^10.0.0",
     "concurrently": "^9.1.0",
-    "copyfiles": "^2.4.1",
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"

@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const game_1 = require("./entity/game");
+const constants_1 = require("./constants");
 const app_1 = require("./app");
 // Lobby Room ID
 const lobbyId = "lobby_room";
@@ -29,6 +30,11 @@ const Lobby = {
         const newGame = Lobby.createPendingGame({ mapName, gameName });
         // Update the lobby games list
         Lobby.updateLobbyGames();
+        setTimeout(() => {
+            if (newGame.isEmpty()) {
+                Lobby.deletePendingGame(newGame.id);
+            }
+        }, constants_1.LOBBY_TIMEOUT * 1000);
         // Return the new game's ID
         callback({ game_id: newGame.id });
     },

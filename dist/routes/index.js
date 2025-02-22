@@ -9,8 +9,9 @@ const auth_1 = require("../controllers/auth");
 const stats_1 = require("../controllers/stats");
 const router = (0, express_1.Router)();
 router.get("/", (req, res) => {
-    res.send("Hello!");
+    res.send("Hello it's update!");
 });
 router.post("/auth", (0, validationMiddleware_1.default)("/auth"), auth_1.login);
 router.get("/stats", stats_1.getStats);
+router.get("/getPendingGames");
 exports.default = router;
