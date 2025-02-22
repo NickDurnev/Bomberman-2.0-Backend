@@ -6,7 +6,6 @@
   "scripts": {
     "start": "node dist/app.js",
     "build": "tsc",
-    "postbuild": "copyfiles -u 1 src/maps/* dist",
     "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/app.ts"
   },
   "_moduleAliases": {
