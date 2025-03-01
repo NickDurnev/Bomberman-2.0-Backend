@@ -3,8 +3,10 @@ import {
   DESTRUCTIBLE_CELL,
   NON_DESTRUCTIBLE_CELL,
   SPOIL_CHANCE,
+  SMALL_MAP_PORTAL_SPAWNS,
 } from "../constants";
 import { Spoil } from "./spoil";
+import { Portal } from "./portal";
 import { v4 as uuidv4 } from "uuid";
 
 type BombConfig = {
@@ -20,6 +22,7 @@ type BlastedCell = {
   type: string;
   destroyed: boolean;
   spoil: Spoil | null;
+  portal: Portal | null;
 };
 
 export class Bomb {
@@ -86,7 +89,22 @@ export class Bomb {
     direction: string,
     destroyed: boolean
   ) {
-    const spoil = this.craftSpoil(row, col);
+    const isPortal = SMALL_MAP_PORTAL_SPAWNS.some(
+      (portal) => portal.row === row && portal.col === col
+    );
+
+    let spoil: Spoil | null = null;
+    let portal: Portal | null = null;
+
+    console.log(" col:", col);
+    console.log(" row:", row);
+    console.log(" isPortal:", isPortal);
+    if (isPortal) {
+      portal = new Portal(row, col);
+      this.game.addPortal(portal);
+    } else {
+      spoil = this.craftSpoil(row, col);
+    }
 
     this.blastedCells.push({
       row,
@@ -94,6 +112,7 @@ export class Bomb {
       type: `explosion_${direction}`,
       destroyed,
       spoil,
+      portal,
     });
   }
 

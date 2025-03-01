@@ -10,6 +10,7 @@ import {
 import Player from "./player";
 import { Bomb } from "./bomb";
 import { Spoil } from "./spoil";
+import { Portal } from "./portal";
 
 // Assuming the type structure of `layer_info` from the map JSON file
 interface LayerInfo {
@@ -36,6 +37,7 @@ export class Game {
   shadow_map: number[][];
   spoils: Map<string, Spoil>;
   bombs: Map<string, Bomb>;
+  portals: Map<string, Portal>;
   tombstones: Map<string, { row: number; col: number }>;
 
   constructor({ mapName, gameName }: NewGamePayload) {
@@ -50,6 +52,7 @@ export class Game {
     this.shadow_map = this.createMapData();
     this.spoils = new Map();
     this.bombs = new Map();
+    this.portals = new Map();
     this.tombstones = new Map();
   }
 
@@ -173,6 +176,10 @@ export class Game {
 
   addSpoil(spoil: any) {
     this.spoils.set(spoil.id, spoil);
+  }
+
+  addPortal(portal: any) {
+    this.portals.set(portal.id, portal);
   }
 
   addTombStone({

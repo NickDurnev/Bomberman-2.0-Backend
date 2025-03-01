@@ -22,3 +22,10 @@ export const GAME_DURATION = 180; // 3 minutes
 export const POINTS_PER_KILL = 1;
 export const POINTS_PER_WIN = 3;
 export const POINTS_PER_TOP3 = 1;
+
+export const SMALL_MAP_PORTAL_SPAWNS = [
+  { row: 3, col: 3 },
+  { row: 15, col: 3 },
+  { row: 3, col: 28 },
+  { row: 15, col: 28 },
+];

@@ -54,6 +54,7 @@ class Play {
     const game = Lobby.deletePendingGame(this.socket_game_id);
     if (!game) return; // Type check to ensure `game` is defined
     runningGames.set(game.id, game);
+    console.log(" game.id:", game.id);
     console.log(`Game ${game.id} has started...`);
 
     this.endGame({
