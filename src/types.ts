@@ -4,30 +4,32 @@ import Play from "./play";
 type PlayerId = string;
 type GameId = string;
 
+type GameAndPlayer = {
+  gameId: GameId;
+  playerId: PlayerId;
+};
+
 export type Coordinates = { x: number; y: number };
-export type UserDetails = {
+
+export interface UserDetails extends GameAndPlayer {
   col: number;
   row: number;
-  playerId: PlayerId;
-  gameId: GameId;
   killerId?: string;
-};
-export type SpoilDetails = {
+}
+
+export interface PortalDetails extends GameAndPlayer {
+  portal_id: string;
+}
+
+export interface SpoilDetails extends GameAndPlayer {
   spoil_id: string;
-  playerId: PlayerId;
-  gameId: GameId;
-};
+}
 
-export type BombDetails = {
+export interface BombDetails extends GameAndPlayer {
   bomb_id: string;
-  playerId: PlayerId;
-  gameId: GameId;
-};
+}
 
-export type PlayerPositionData = Coordinates & {
-  playerId: PlayerId;
-  gameId: GameId;
-};
+export type PlayerPositionData = GameAndPlayer & Coordinates;
 
 export type Spawn = {
   x: number;

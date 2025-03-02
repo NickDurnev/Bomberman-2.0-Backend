@@ -96,9 +96,6 @@ export class Bomb {
     let spoil: Spoil | null = null;
     let portal: Portal | null = null;
 
-    console.log(" col:", col);
-    console.log(" row:", row);
-    console.log(" isPortal:", isPortal);
     if (isPortal) {
       portal = new Portal(row, col);
       this.game.addPortal(portal);

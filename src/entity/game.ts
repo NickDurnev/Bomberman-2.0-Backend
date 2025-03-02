@@ -174,6 +174,14 @@ export class Game {
     return this.spoils.get(spoil_id);
   }
 
+  findPortal(portal_id: string) {
+    return this.portals.get(portal_id);
+  }
+
+  getPortals() {
+    return this.portals;
+  }
+
   addSpoil(spoil: any) {
     this.spoils.set(spoil.id, spoil);
   }

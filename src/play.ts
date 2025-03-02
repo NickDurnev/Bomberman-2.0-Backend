@@ -3,10 +3,11 @@ import { Game } from "@entity/game";
 import {
   UserDetails,
   SpoilDetails,
+  PortalDetails,
   PlayerPositionData,
   BombDetails,
 } from "@types";
-import { GAME_DURATION } from "@constants";
+import { GAME_DURATION, TILE_SIZE } from "@constants";
 import Lobby from "./lobby";
 import Player from "./entity/player";
 import { serverSocket } from "./app";
@@ -185,6 +186,42 @@ class Play {
         player_id: currentPlayer?.id,
         spoil_id: spoil.id,
         spoil_type: spoil.spoil_type,
+      });
+    }
+  }
+
+  onUsePortal({ portal_id, playerId, gameId }: PortalDetails) {
+    const currentGame = runningGames.get(gameId);
+    if (!currentGame) return;
+
+    const currentPlayer = currentGame.players.find(
+      (player) => player.id === playerId
+    );
+    const portals = Array.from(currentGame.getPortals().values());
+    if (portals.length <= 1) return;
+
+    const currentPortal = currentGame.findPortal(portal_id);
+    if (!currentPortal) return;
+
+    // Filter out the current portal
+    const otherPortals = portals.filter((portal) => portal.id !== portal_id);
+
+    // Randomly select another portal
+    const randomIndex = Math.floor(Math.random() * otherPortals.length);
+    const randomPortal = otherPortals[randomIndex];
+    console.log(" randomPortal:", randomPortal);
+
+    // Get the coordinates of the selected portal
+    const { row, col } = randomPortal;
+
+    if (randomPortal) {
+      //Update player position
+      // currentGame.deleteSpoil(spoil.id);
+      // currentPlayer?.pickSpoil(spoil.spoil_type);
+      serverSocket.sockets.to(gameId).emit("teleport player", {
+        player_id: currentPlayer?.id,
+        x: col * TILE_SIZE + TILE_SIZE / 2,
+        y: row * TILE_SIZE + TILE_SIZE / 2,
       });
     }
   }
