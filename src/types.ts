@@ -44,6 +44,8 @@ export type SpawnOnGrid = {
 export type NewGamePayload = {
   mapName: string;
   gameName: string;
+  isPortalsEnabled: boolean;
+  isDelaySpoilEnabled: boolean;
 };
 
 export type User = {

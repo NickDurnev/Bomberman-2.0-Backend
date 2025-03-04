@@ -6,16 +6,21 @@ import {
   PortalDetails,
   PlayerPositionData,
   BombDetails,
+  NewGamePayload,
 } from "@types";
-import { GAME_DURATION, TILE_SIZE } from "@constants";
+import {
+  GAME_DURATION,
+  TILE_SIZE,
+  INITIAL_POWER,
+  INITIAL_DELAY,
+} from "@constants";
 import Lobby from "./lobby";
 import Player from "./entity/player";
 import { serverSocket } from "./app";
 
 type EndGameArgs = {
   game_id: string;
-  mapName: string;
-  gameName: string;
+  gameData: NewGamePayload;
   delay: number;
   winnerId?: string | null;
   isProcessStats?: boolean;
@@ -60,8 +65,12 @@ class Play {
 
     this.endGame({
       game_id: game.id,
-      mapName: game.mapName,
-      gameName: game.name,
+      gameData: {
+        mapName: game.mapName,
+        gameName: game.name,
+        isPortalsEnabled: game.isPortalsEnabled,
+        isDelaySpoilEnabled: game.isDelaySpoilEnabled,
+      },
       delay: GAME_DURATION,
       isProcessStats: false,
     });
@@ -74,8 +83,7 @@ class Play {
 
   async endGame({
     game_id,
-    mapName,
-    gameName,
+    gameData,
     winnerId = null,
     isProcessStats = true,
     delay,
@@ -88,7 +96,7 @@ class Play {
     }
 
     setTimeout(() => {
-      const newGame = Lobby.createPendingGame({ mapName, gameName });
+      const newGame = Lobby.createPendingGame(gameData);
       runningGames.delete(game_id);
 
       serverSocket.sockets.to(game_id).emit("end game", {
@@ -131,13 +139,14 @@ class Play {
     const bomb = currentGame.addBomb({
       col,
       row,
-      power: currentPlayer?.power ?? 1,
+      power: currentPlayer?.power ?? INITIAL_POWER,
+      delay: currentPlayer?.delay ?? INITIAL_DELAY,
     });
 
     if (bomb) {
       setTimeout(() => {
         this.detonateBomb({ bomb_id: bomb.id, playerId, gameId });
-      }, bomb.explosion_time);
+      }, bomb.delay);
 
       serverSocket.sockets.to(gameId).emit("show bomb", {
         bomb_id: bomb.id,
@@ -264,14 +273,20 @@ class Play {
       });
     }
 
+    const currentGameData = {
+      mapName: currentGame.mapName,
+      gameName: currentGame.name,
+      isPortalsEnabled: currentGame.isPortalsEnabled,
+      isDelaySpoilEnabled: currentGame.isDelaySpoilEnabled,
+    };
+
     if (alivePlayersCount < 2 && alivePlayer) {
       serverSocket.sockets
         .to(gameId)
         .emit("player win", { winner: alivePlayer, prevGameInfo: currentGame });
       this.endGame({
         game_id: gameId,
-        mapName: currentGame.mapName,
-        gameName: currentGame.name,
+        gameData: currentGameData,
         winnerId: alivePlayer.id,
         delay: 5,
       });
@@ -280,8 +295,7 @@ class Play {
     if (!alivePlayersCount) {
       this.endGame({
         game_id: gameId,
-        mapName: currentGame.mapName,
-        gameName: currentGame.name,
+        gameData: currentGameData,
         delay: 0,
       });
     }

@@ -1,5 +1,4 @@
 import {
-  EXPLOSION_TIME,
   DESTRUCTIBLE_CELL,
   NON_DESTRUCTIBLE_CELL,
   SPOIL_CHANCE,
@@ -14,6 +13,7 @@ type BombConfig = {
   col: number;
   row: number;
   power: number;
+  delay: number;
 };
 
 type BlastedCell = {
@@ -29,16 +29,16 @@ export class Bomb {
   id: string;
   game: any;
   power: number;
-  explosion_time: number;
+  delay: number;
   col: number;
   row: number;
   blastedCells: BlastedCell[];
 
-  constructor({ game, col, row, power }: BombConfig) {
+  constructor({ game, col, row, power, delay }: BombConfig) {
     this.id = uuidv4();
     this.game = game;
     this.power = power;
-    this.explosion_time = EXPLOSION_TIME;
+    this.delay = delay;
     this.col = col;
     this.row = row;
     this.blastedCells = [];
@@ -89,9 +89,12 @@ export class Bomb {
     direction: string,
     destroyed: boolean
   ) {
-    const isPortal = SMALL_MAP_PORTAL_SPAWNS.some(
-      (portal) => portal.row === row && portal.col === col
-    );
+    let isPortal = false;
+    if (this.game.isPortalsEnabled) {
+      isPortal = SMALL_MAP_PORTAL_SPAWNS.some(
+        (portal) => portal.row === row && portal.col === col
+      );
+    }
 
     let spoil: Spoil | null = null;
     let portal: Portal | null = null;
@@ -116,8 +119,10 @@ export class Bomb {
   private craftSpoil(row: number, col: number): Spoil | null {
     const randomNumber = Math.floor(Math.random() * 100);
 
+    const isDelaySpoilEnabled = this.game.isDelaySpoilEnabled;
+
     if (randomNumber < SPOIL_CHANCE) {
-      const spoil = new Spoil(row, col);
+      const spoil = new Spoil(row, col, isDelaySpoilEnabled);
       this.game.addSpoil(spoil);
       return spoil;
     }

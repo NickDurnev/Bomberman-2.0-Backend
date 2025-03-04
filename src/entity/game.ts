@@ -30,6 +30,8 @@ export class Game {
   id: string;
   name: string;
   mapName: string;
+  isPortalsEnabled: boolean;
+  isDelaySpoilEnabled: boolean;
   layer_info: LayerInfo;
   max_players: number;
   players: Player[];
@@ -40,10 +42,17 @@ export class Game {
   portals: Map<string, Portal>;
   tombstones: Map<string, { row: number; col: number }>;
 
-  constructor({ mapName, gameName }: NewGamePayload) {
+  constructor({
+    mapName,
+    gameName,
+    isPortalsEnabled,
+    isDelaySpoilEnabled,
+  }: NewGamePayload) {
     this.id = uuidv4();
     this.name = gameName;
     this.mapName = mapName;
+    this.isPortalsEnabled = isPortalsEnabled;
+    this.isDelaySpoilEnabled = isDelaySpoilEnabled;
     this.layer_info = require(`../maps/${this.mapName}.json`)
       .layers[0] as LayerInfo;
     this.max_players = this.layer_info.properties.max_players;
@@ -81,7 +90,6 @@ export class Game {
 
   async processGameStats(winnerId: string | null = null) {
     for (const player of this.players) {
-      console.log("player:", player);
       const isWin = player.id === winnerId;
       await player.processStats(isWin);
     }
@@ -151,12 +159,14 @@ export class Game {
     col,
     row,
     power,
+    delay,
   }: {
     col: number;
     row: number;
     power: number;
+    delay: number;
   }): Bomb | false {
-    const bomb = new Bomb({ game: this, col, row, power });
+    const bomb = new Bomb({ game: this, col, row, power, delay });
     if (this.bombs.has(bomb.id)) return false;
     this.bombs.set(bomb.id, bomb);
     return bomb;
