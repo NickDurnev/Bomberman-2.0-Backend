@@ -1,7 +1,5 @@
 export const TILE_SIZE = 35;
 
-export const EXPLOSION_TIME = 2000;
-
 export const SPOIL_CHANCE = 50;
 export const SPEED = 0;
 export const POWER = 1;
@@ -15,6 +13,10 @@ export const NON_DESTRUCTIBLE_CELL = 1;
 export const INITIAL_POWER = 1;
 export const STEP_POWER = 1;
 
+export const INITIAL_DELAY = 2000;
+export const STEP_DELAY = 200;
+export const MIN_DELAY = 200;
+
 export const LOBBY_TIMEOUT = 180; // 3 minutes
 
 export const GAME_DURATION = 180; // 3 minutes
@@ -22,3 +24,17 @@ export const GAME_DURATION = 180; // 3 minutes
 export const POINTS_PER_KILL = 1;
 export const POINTS_PER_WIN = 3;
 export const POINTS_PER_TOP3 = 1;
+
+export const SMALL_MAP_PORTAL_SPAWNS = [
+  { row: 3, col: 3 },
+  { row: 15, col: 3 },
+  { row: 3, col: 28 },
+  { row: 15, col: 28 },
+];
+
+export const DEFAULT_MAP_PORTAL_SPAWNS = [
+  { row: 1, col: 1 },
+  { row: 19, col: 1 },
+  { row: 1, col: 30 },
+  { row: 19, col: 30 },
+];

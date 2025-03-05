@@ -24,10 +24,10 @@ const Lobby = {
 
   onCreateGame(
     this: CustomSocket,
-    { mapName, gameName }: NewGamePayload,
+    data: NewGamePayload,
     callback: (data: { game_id: string }) => void
   ) {
-    const newGame = Lobby.createPendingGame({ mapName, gameName });
+    const newGame = Lobby.createPendingGame(data);
 
     // Update the lobby games list
     Lobby.updateLobbyGames();
@@ -81,8 +81,8 @@ const Lobby = {
     }
   },
 
-  createPendingGame({ mapName, gameName }: NewGamePayload) {
-    const newGame = new Game({ mapName, gameName });
+  createPendingGame(data: NewGamePayload) {
+    const newGame = new Game(data);
     pendingGames.set(newGame.id, newGame);
     return newGame;
   },

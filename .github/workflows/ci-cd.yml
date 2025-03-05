@@ -44,7 +44,6 @@ jobs:
             echo "Building the application..."
             npm run build
 
-            echo "Copying map files..."
             mkdir -p dist  
             if [ -d src/maps ]; then
               npx copyfiles -u 1 src/maps/* dist

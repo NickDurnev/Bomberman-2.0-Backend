@@ -2,6 +2,10 @@ import {
   POWER,
   INITIAL_POWER,
   STEP_POWER,
+  DELAY,
+  INITIAL_DELAY,
+  STEP_DELAY,
+  MIN_DELAY,
   POINTS_PER_KILL,
   POINTS_PER_WIN,
   POINTS_PER_TOP3,
@@ -15,6 +19,7 @@ class Player {
   spawn: Spawn;
   spawnOnGrid: SpawnOnGrid;
   isAlive: boolean;
+  delay: number;
   power: number;
   isTop3: boolean;
   kills: string[];
@@ -29,12 +34,17 @@ class Player {
     this.isAlive = true;
     this.isTop3 = false;
     this.power = INITIAL_POWER;
+    this.delay = INITIAL_DELAY;
     this.kills = [];
   }
 
   pickSpoil(spoil_type: number) {
     if (spoil_type === POWER) {
       this.power += STEP_POWER;
+    }
+
+    if (spoil_type === DELAY && this.delay > MIN_DELAY) {
+      this.delay -= STEP_DELAY;
     }
   }
 

@@ -123,6 +123,9 @@ const start = async () => {
       client.on("pick up spoil", (spoilDetails) =>
         playerPlayInstance.onPickUpSpoil(spoilDetails)
       );
+      client.on("use portal", (portalDetails) =>
+        playerPlayInstance.onUsePortal(portalDetails)
+      );
       client.on("player died", (data) => playerPlayInstance.onPlayerDied(data));
       client.on("leave game", () => playerPlayInstance.onLeaveGame());
 

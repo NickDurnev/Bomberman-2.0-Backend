@@ -10,6 +10,7 @@ import {
 import Player from "./player";
 import { Bomb } from "./bomb";
 import { Spoil } from "./spoil";
+import { Portal } from "./portal";
 
 // Assuming the type structure of `layer_info` from the map JSON file
 interface LayerInfo {
@@ -29,6 +30,8 @@ export class Game {
   id: string;
   name: string;
   mapName: string;
+  isPortalsEnabled: boolean;
+  isDelaySpoilEnabled: boolean;
   layer_info: LayerInfo;
   max_players: number;
   players: Player[];
@@ -36,12 +39,20 @@ export class Game {
   shadow_map: number[][];
   spoils: Map<string, Spoil>;
   bombs: Map<string, Bomb>;
+  portals: Map<string, Portal>;
   tombstones: Map<string, { row: number; col: number }>;
 
-  constructor({ mapName, gameName }: NewGamePayload) {
+  constructor({
+    mapName,
+    gameName,
+    isPortalsEnabled,
+    isDelaySpoilEnabled,
+  }: NewGamePayload) {
     this.id = uuidv4();
     this.name = gameName;
     this.mapName = mapName;
+    this.isPortalsEnabled = isPortalsEnabled;
+    this.isDelaySpoilEnabled = isDelaySpoilEnabled;
     this.layer_info = require(`../maps/${this.mapName}.json`)
       .layers[0] as LayerInfo;
     this.max_players = this.layer_info.properties.max_players;
@@ -50,6 +61,7 @@ export class Game {
     this.shadow_map = this.createMapData();
     this.spoils = new Map();
     this.bombs = new Map();
+    this.portals = new Map();
     this.tombstones = new Map();
   }
 
@@ -78,7 +90,6 @@ export class Game {
 
   async processGameStats(winnerId: string | null = null) {
     for (const player of this.players) {
-      console.log("player:", player);
       const isWin = player.id === winnerId;
       await player.processStats(isWin);
     }
@@ -148,12 +159,14 @@ export class Game {
     col,
     row,
     power,
+    delay,
   }: {
     col: number;
     row: number;
     power: number;
+    delay: number;
   }): Bomb | false {
-    const bomb = new Bomb({ game: this, col, row, power });
+    const bomb = new Bomb({ game: this, col, row, power, delay });
     if (this.bombs.has(bomb.id)) return false;
     this.bombs.set(bomb.id, bomb);
     return bomb;
@@ -171,8 +184,20 @@ export class Game {
     return this.spoils.get(spoil_id);
   }
 
+  findPortal(portal_id: string) {
+    return this.portals.get(portal_id);
+  }
+
+  getPortals() {
+    return this.portals;
+  }
+
   addSpoil(spoil: any) {
     this.spoils.set(spoil.id, spoil);
+  }
+
+  addPortal(portal: any) {
+    this.portals.set(portal.id, portal);
   }
 
   addTombStone({

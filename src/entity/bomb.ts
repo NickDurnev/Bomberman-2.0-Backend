@@ -1,10 +1,12 @@
 import {
-  EXPLOSION_TIME,
   DESTRUCTIBLE_CELL,
   NON_DESTRUCTIBLE_CELL,
   SPOIL_CHANCE,
+  SMALL_MAP_PORTAL_SPAWNS,
+  DEFAULT_MAP_PORTAL_SPAWNS,
 } from "../constants";
 import { Spoil } from "./spoil";
+import { Portal } from "./portal";
 import { v4 as uuidv4 } from "uuid";
 
 type BombConfig = {
@@ -12,6 +14,7 @@ type BombConfig = {
   col: number;
   row: number;
   power: number;
+  delay: number;
 };
 
 type BlastedCell = {
@@ -20,22 +23,23 @@ type BlastedCell = {
   type: string;
   destroyed: boolean;
   spoil: Spoil | null;
+  portal: Portal | null;
 };
 
 export class Bomb {
   id: string;
   game: any;
   power: number;
-  explosion_time: number;
+  delay: number;
   col: number;
   row: number;
   blastedCells: BlastedCell[];
 
-  constructor({ game, col, row, power }: BombConfig) {
+  constructor({ game, col, row, power, delay }: BombConfig) {
     this.id = uuidv4();
     this.game = game;
     this.power = power;
-    this.explosion_time = EXPLOSION_TIME;
+    this.delay = delay;
     this.col = col;
     this.row = row;
     this.blastedCells = [];
@@ -86,7 +90,26 @@ export class Bomb {
     direction: string,
     destroyed: boolean
   ) {
-    const spoil = this.craftSpoil(row, col);
+    let isPortal = false;
+    let portalSpawns = DEFAULT_MAP_PORTAL_SPAWNS;
+    if (this.game.mapName === "small_map") {
+      portalSpawns = SMALL_MAP_PORTAL_SPAWNS;
+    }
+    if (this.game.isPortalsEnabled) {
+      isPortal = portalSpawns.some(
+        (portal) => portal.row === row && portal.col === col
+      );
+    }
+
+    let spoil: Spoil | null = null;
+    let portal: Portal | null = null;
+
+    if (isPortal) {
+      portal = new Portal(row, col);
+      this.game.addPortal(portal);
+    } else {
+      spoil = this.craftSpoil(row, col);
+    }
 
     this.blastedCells.push({
       row,
@@ -94,14 +117,17 @@ export class Bomb {
       type: `explosion_${direction}`,
       destroyed,
       spoil,
+      portal,
     });
   }
 
   private craftSpoil(row: number, col: number): Spoil | null {
     const randomNumber = Math.floor(Math.random() * 100);
 
+    const isDelaySpoilEnabled = this.game.isDelaySpoilEnabled;
+
     if (randomNumber < SPOIL_CHANCE) {
-      const spoil = new Spoil(row, col);
+      const spoil = new Spoil(row, col, isDelaySpoilEnabled);
       this.game.addSpoil(spoil);
       return spoil;
     }
