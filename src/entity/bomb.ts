@@ -3,6 +3,7 @@ import {
   NON_DESTRUCTIBLE_CELL,
   SPOIL_CHANCE,
   SMALL_MAP_PORTAL_SPAWNS,
+  DEFAULT_MAP_PORTAL_SPAWNS,
 } from "../constants";
 import { Spoil } from "./spoil";
 import { Portal } from "./portal";
@@ -90,8 +91,12 @@ export class Bomb {
     destroyed: boolean
   ) {
     let isPortal = false;
+    let portalSpawns = DEFAULT_MAP_PORTAL_SPAWNS;
+    if (this.game.mapName === "small_map") {
+      portalSpawns = SMALL_MAP_PORTAL_SPAWNS;
+    }
     if (this.game.isPortalsEnabled) {
-      isPortal = SMALL_MAP_PORTAL_SPAWNS.some(
+      isPortal = portalSpawns.some(
         (portal) => portal.row === row && portal.col === col
       );
     }

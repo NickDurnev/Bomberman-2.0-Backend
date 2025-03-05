@@ -31,3 +31,10 @@ export const SMALL_MAP_PORTAL_SPAWNS = [
   { row: 3, col: 28 },
   { row: 15, col: 28 },
 ];
+
+export const DEFAULT_MAP_PORTAL_SPAWNS = [
+  { row: 1, col: 1 },
+  { row: 19, col: 1 },
+  { row: 1, col: 30 },
+  { row: 19, col: 30 },
+];
