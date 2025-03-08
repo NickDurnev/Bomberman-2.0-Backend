@@ -26,6 +26,10 @@ jobs:
             nvm use 22.14.0 
 
             cd Bomberman-2.0-Backend
+
+            echo "Resetting repository to avoid conflicts..."
+            git reset --hard HEAD
+            git clean -fd
             git pull https://${{ secrets.USERNAME }}:${{ secrets.TOKEN }}@github.com/${{ secrets.USERNAME }}/Bomberman-2.0-Backend.git main            
 
             echo "Updating environment variables..."
@@ -40,6 +44,7 @@ jobs:
 
             echo "Installing dependencies..."
             npm install --production
+            npm install --save-dev @types/express @types/node-cron @types/uuid
 
             echo "Building the application..."
             npm run build
@@ -50,4 +55,6 @@ jobs:
             fi
 
             echo "Restarting application..."
-            pm2 restart app
+            pm2 delete app || true
+            pm2 start dist/app.js --name app --env production
+            pm2 save
