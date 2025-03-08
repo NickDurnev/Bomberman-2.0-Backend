@@ -149,13 +149,14 @@ const start = async () => {
         return;
       }
       console.log("Player was inside game...");
+      console.log(" client.customId:", client.customId);
 
       // If the game is pending, use Lobby methods
       Lobby.onLeavePendingGame.call(client);
 
       // If the game is active, use the `Play` instance method
       if (client.playInstance) {
-        client.playInstance.onDisconnectFromGame();
+        client.playInstance.onDisconnectFromGame(client.customId || "");
       }
     }
   } catch (error: any) {
