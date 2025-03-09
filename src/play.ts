@@ -117,14 +117,28 @@ class Play {
       .emit("move player", { player_id: playerId, ...coordinates });
   }
 
-  onDisconnectFromGame() {
+  onDisconnectFromGame(playerId: string) {
     if (this.socket_game_id) {
       const currentGame = runningGames.get(this.socket_game_id);
 
-      if (currentGame) {
+      currentGame?.removePlayer(playerId);
+
+      if (currentGame?.players.length === 1) {
+        this.endGame({
+          game_id: this.socket_game_id,
+          gameData: {
+            mapName: currentGame.mapName,
+            gameName: currentGame.name,
+            isPortalsEnabled: currentGame.isPortalsEnabled,
+            isDelaySpoilEnabled: currentGame.isDelaySpoilEnabled,
+          },
+          delay: 0,
+          isProcessStats: false,
+        });
+      } else {
         serverSocket.sockets
           .in(this.socket_game_id)
-          .emit("player disconnect", { player_id: this.id });
+          .emit("player disconnect", { player_id: playerId });
       }
     }
   }
