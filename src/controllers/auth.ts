@@ -4,8 +4,10 @@ import User from "@db/models/User";
 
 export async function login(req: any, res: any) {
   const { email, picture } = req.body;
-  const uploadResult = await cloudinary.uploader.upload(picture, {
+  const transformedURL = await transformUrl(picture);
+  const uploadResult = await cloudinary.uploader.upload(transformedURL, {
     folder: "users",
+    format: "png",
   });
   const pictureUrl = uploadResult.secure_url;
   await connection();
@@ -37,4 +39,15 @@ export async function login(req: any, res: any) {
   } catch (error: any) {
     res.status(error.status).json({ success: false, message: error.message });
   }
+}
+
+function transformUrl(url: string): string {
+  const googleImageRegex = /^https:\/\/lh3\.googleusercontent\.com\//;
+
+  // Check if the URL is from Google
+  if (googleImageRegex.test(url)) {
+    return url.replace(/=s\d+-c$/, "=s460-c");
+  }
+
+  return url; // Return as-is if not a Google image
 }
