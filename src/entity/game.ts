@@ -41,6 +41,7 @@ export class Game {
   bombs: Map<string, Bomb>;
   portals: Map<string, Portal>;
   tombstones: Map<string, { row: number; col: number }>;
+  createdAt: number;
 
   constructor({
     mapName,
@@ -63,6 +64,7 @@ export class Game {
     this.bombs = new Map();
     this.portals = new Map();
     this.tombstones = new Map();
+    this.createdAt = Date.now();
   }
 
   async addPlayer(id: string) {

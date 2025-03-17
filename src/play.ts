@@ -27,7 +27,6 @@ type EndGameArgs = {
 };
 
 const runningGames: Map<string, Game> = new Map();
-
 class Play {
   socket_game_id: string | null = null;
   id: string;
@@ -315,5 +314,18 @@ class Play {
     }
   }
 }
+
+// Cleanup job: Runs every 1 minute to remove stale running games
+setInterval(() => {
+  const now = Date.now();
+  runningGames.forEach((game, gameId) => {
+    if (now - game.createdAt >= GAME_DURATION * 1000) {
+      if (game.isEmpty()) {
+        console.log(`Deleting running game ${gameId}...`);
+        Lobby.deletePendingGame(gameId);
+      }
+    }
+  });
+}, 60 * 1000);
 
 export default Play;
