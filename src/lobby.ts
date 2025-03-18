@@ -28,15 +28,9 @@ const Lobby = {
     callback: (data: { game_id: string }) => void
   ) {
     const newGame = Lobby.createPendingGame(data);
-
+    newGame.createdAt = Date.now(); // Store timestamp
     // Update the lobby games list
     Lobby.updateLobbyGames();
-
-    setTimeout(() => {
-      if (newGame.isEmpty()) {
-        Lobby.deletePendingGame(newGame.id);
-      }
-    }, LOBBY_TIMEOUT * 1000);
 
     // Return the new game's ID
     callback({ game_id: newGame.id });
@@ -126,5 +120,18 @@ const Lobby = {
       .emit("update game", { current_game: game });
   },
 };
+
+// Cleanup job: Runs every 1 minute to remove stale pending games
+setInterval(() => {
+  const now = Date.now();
+  pendingGames.forEach((game, gameId) => {
+    if (now - game.createdAt >= LOBBY_TIMEOUT * 1000) {
+      if (game.isEmpty()) {
+        console.log(`Deleting pending game ${gameId}...`);
+        Lobby.deletePendingGame(gameId);
+      }
+    }
+  });
+}, 60 * 1000);
 
 export default Lobby;
