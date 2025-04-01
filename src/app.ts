@@ -58,13 +58,8 @@ const start = async () => {
     });
 
     serverSocket.sockets.on("connection", (client: CustomSocket) => {
-      console.log(`New player has connected: ${client.id}`);
-
       //update user socket id
       client.on("updateUserSocketId", async (req, callback) => {
-        console.log("updateUserSocketId:");
-        console.log("req:", req);
-
         await storeSocketID(req.email, req.socket_id);
 
         client.customId = req.socket_id;
@@ -73,7 +68,6 @@ const start = async () => {
           status: 200,
           message: "Socket id updated successfully",
         });
-        console.log("doneeee");
       });
 
       // Create a new Play instance and store it on the client object
@@ -101,7 +95,6 @@ const start = async () => {
         "get current game",
         (game_id: string, callback: (game: any) => void) => {
           const game = playerPlayInstance.onGetCurrentGame(game_id);
-          console.log("Game fetched:", game);
           callback(game); // Send the game data back to the client
         }
       );
@@ -145,11 +138,8 @@ const start = async () => {
 
     function onClientDisconnect(client: CustomSocket) {
       if (client.socket_game_id == null) {
-        console.log("Player was not inside any game...");
         return;
       }
-      console.log("Player was inside game...");
-      console.log(" client.customId:", client.customId);
 
       // If the game is pending, use Lobby methods
       Lobby.onLeavePendingGame.call(client);
