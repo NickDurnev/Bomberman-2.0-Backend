@@ -64,6 +64,7 @@ const Lobby = {
 
       if (current_game.isEmpty()) {
         Lobby.deletePendingGame(current_game.id);
+        Lobby.updateLobbyGames();
         return;
       }
 
@@ -127,7 +128,6 @@ setInterval(() => {
   pendingGames.forEach((game, gameId) => {
     if (now - game.createdAt >= LOBBY_TIMEOUT * 1000) {
       if (game.isEmpty()) {
-        console.log(`Deleting pending game ${gameId}...`);
         Lobby.deletePendingGame(gameId);
       }
     }

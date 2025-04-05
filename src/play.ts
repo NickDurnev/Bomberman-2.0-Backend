@@ -59,8 +59,6 @@ class Play {
     const game = Lobby.deletePendingGame(this.socket_game_id);
     if (!game) return; // Type check to ensure `game` is defined
     runningGames.set(game.id, game);
-    console.log(" game.id:", game.id);
-    console.log(`Game ${game.id} has started...`);
 
     this.endGame({
       game_id: game.id,
@@ -103,8 +101,6 @@ class Play {
         new_game_id: newGame.id,
         prevGameInfo: currentGame,
       });
-
-      console.log(`Game ${game_id} has finished...`);
     }, delay * 1000);
   }
 
@@ -231,15 +227,12 @@ class Play {
     // Randomly select another portal
     const randomIndex = Math.floor(Math.random() * otherPortals.length);
     const randomPortal = otherPortals[randomIndex];
-    console.log(" randomPortal:", randomPortal);
 
     // Get the coordinates of the selected portal
     const { row, col } = randomPortal;
 
     if (randomPortal) {
       //Update player position
-      // currentGame.deleteSpoil(spoil.id);
-      // currentPlayer?.pickSpoil(spoil.spoil_type);
       serverSocket.sockets.to(gameId).emit("teleport player", {
         player_id: currentPlayer?.id,
         x: col * TILE_SIZE + TILE_SIZE / 2,
@@ -321,7 +314,6 @@ setInterval(() => {
   runningGames.forEach((game, gameId) => {
     if (now - game.createdAt >= GAME_DURATION * 1000) {
       if (game.isEmpty()) {
-        console.log(`Deleting running game ${gameId}...`);
         Lobby.deletePendingGame(gameId);
       }
     }
