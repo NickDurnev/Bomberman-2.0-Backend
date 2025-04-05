@@ -122,6 +122,10 @@ const start = async () => {
       client.on("player died", (data) => playerPlayInstance.onPlayerDied(data));
       client.on("leave game", () => playerPlayInstance.onLeaveGame());
 
+      client.on("player disconnect", (data) =>
+        playerPlayInstance.onDisconnectFromGame(data.player_id)
+      );
+
       client.on("joinRoom", (data) => {
         const { room_id } = data;
         client.join(room_id);
