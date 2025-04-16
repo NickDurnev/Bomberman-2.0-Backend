@@ -38,3 +38,15 @@ export const DEFAULT_MAP_PORTAL_SPAWNS = [
   { row: 1, col: 30 },
   { row: 19, col: 30 },
 ];
+
+export const NO_KILL_PHRASES = [
+  "I just tried to survive 🏃‍♂️",
+  "Just pacifist mode ☮️",
+  "I was busy looting 📦",
+  "Stealth is my playstyle 🕵️‍♂️",
+  "They all ran away from me! 😭",
+  "I spared them... for now 😈",
+  "Violence isn't always the answer 🤷‍♂️",
+  "I let my teammates handle it 💪",
+  "My aim is... a work in progress 🎯",
+];
