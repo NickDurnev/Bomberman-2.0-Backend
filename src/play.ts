@@ -15,7 +15,7 @@ import {
   INITIAL_DELAY,
   NO_KILL_PHRASES,
 } from "./constants";
-import { getRandomItem } from "@utils";
+import { getRandomItem } from "./utils";
 import Lobby from "./lobby";
 import Player from "./entity/player";
 import { serverSocket } from "./app";
