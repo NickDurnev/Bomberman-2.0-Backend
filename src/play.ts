@@ -13,7 +13,9 @@ import {
   TILE_SIZE,
   INITIAL_POWER,
   INITIAL_DELAY,
-} from "@constants";
+  NO_KILL_PHRASES,
+} from "./constants";
+import { getRandomItem } from "@utils";
 import Lobby from "./lobby";
 import Player from "./entity/player";
 import { serverSocket } from "./app";
@@ -92,6 +94,8 @@ class Play {
       await currentGame.processGameStats(winnerId);
     }
 
+    const prevGameInfo = this.addKillPhrases(currentGame);
+
     setTimeout(() => {
       const newGame = Lobby.createPendingGame(gameData);
       runningGames.delete(game_id);
@@ -99,7 +103,7 @@ class Play {
       serverSocket.sockets.to(game_id).emit("end game", {
         game_id: game_id,
         new_game_id: newGame.id,
-        prevGameInfo: currentGame,
+        prevGameInfo,
       });
     }, delay * 1000);
   }
@@ -181,6 +185,26 @@ class Play {
         blastedCells,
       });
     }
+  }
+
+  addKillPhrases(currentGame: Game) {
+    const players = currentGame.players.map((player) => {
+      if (player.kills.length > 0) {
+        return player;
+      } else {
+        return {
+          ...player,
+          noKillPhrase: getRandomItem(NO_KILL_PHRASES),
+        };
+      }
+    });
+
+    const prevGameInfo = {
+      ...currentGame,
+      players,
+    };
+
+    return prevGameInfo;
   }
 
   onBlastVsBomb({ bomb_id, playerId, gameId }: BombDetails) {
@@ -286,10 +310,12 @@ class Play {
       isDelaySpoilEnabled: currentGame.isDelaySpoilEnabled,
     };
 
+    const prevGameInfo = this.addKillPhrases(currentGame);
+
     if (alivePlayersCount < 2 && alivePlayer) {
       serverSocket.sockets
         .to(gameId)
-        .emit("player win", { winner: alivePlayer, prevGameInfo: currentGame });
+        .emit("player win", { winner: alivePlayer, prevGameInfo });
       this.endGame({
         game_id: gameId,
         gameData: currentGameData,

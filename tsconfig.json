@@ -8,7 +8,8 @@
       "@middlewares/*": ["src/middlewares/*"],
       "@db/*": ["src/db/*"],
       "@types": ["src/types"],
-      "@constants": ["src/constants"]
+      "@constants": ["src/constants"],
+      "@utils": ["src/utils"]
     },
     "target": "es6",
     "module": "commonjs",
