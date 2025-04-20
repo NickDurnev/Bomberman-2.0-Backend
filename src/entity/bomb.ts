@@ -66,18 +66,20 @@ export class Bomb {
         const cell = this.game.getMapCell(currentRow, currentCol);
         const isWall = cell === NON_DESTRUCTIBLE_CELL;
         const isBox = cell === DESTRUCTIBLE_CELL;
-        const isLast = i === power;
 
-        if (cell === DESTRUCTIBLE_CELL) {
+        if (isBox) {
           this.game.nullifyMapCell(currentRow, currentCol);
+          this.addToBlasted(currentRow, currentCol, direction.end, true);
+          break; // Stop further explosions in this direction
         }
 
-        if (isBox || isWall || isLast) {
-          this.addToBlasted(currentRow, currentCol, direction.end, isBox);
-          break;
+        if (isWall) {
+          this.addToBlasted(currentRow, currentCol, direction.end, false);
+          break; // Stop further explosions in this direction
         }
 
-        this.addToBlasted(currentRow, currentCol, direction.plumb, isBox);
+        // Only add to blasted if it's not a box or wall
+        this.addToBlasted(currentRow, currentCol, direction.plumb, false);
       }
     }
 
