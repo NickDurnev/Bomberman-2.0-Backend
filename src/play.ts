@@ -147,7 +147,7 @@ class Play {
     if (!currentGame) return;
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === playerId
+      (player) => player.id === playerId,
     );
     const bomb = currentGame.addBomb({
       col,
@@ -216,7 +216,7 @@ class Play {
     if (!currentGame) return;
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === playerId
+      (player) => player.id === playerId,
     );
     const spoil = currentGame.findSpoil(spoil_id);
 
@@ -237,7 +237,7 @@ class Play {
     if (!currentGame) return;
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === playerId
+      (player) => player.id === playerId,
     );
     const portals = Array.from(currentGame.getPortals().values());
     if (portals.length <= 1) return;
@@ -278,12 +278,12 @@ class Play {
       .emit("show tombstone", { player_id: playerId, tombId, col, row });
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === playerId
+      (player) => player.id === playerId,
     );
     currentPlayer?.dead();
 
     const currentKiller = currentGame.players.find(
-      (player) => player.id === killerId
+      (player) => player.id === killerId,
     );
     currentKiller?.kill(playerId);
 
@@ -328,7 +328,7 @@ class Play {
       this.endGame({
         game_id: gameId,
         gameData: currentGameData,
-        delay: 0,
+        delay: 2,
       });
     }
   }
