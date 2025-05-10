@@ -13,6 +13,4 @@ router.post("/auth", schemaValidator("/auth"), login);
 
 router.get("/stats", getStats);
 
-router.get("/getPendingGames");
-
 export default router;

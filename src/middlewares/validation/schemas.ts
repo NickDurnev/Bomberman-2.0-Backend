@@ -6,7 +6,6 @@ const userSchema = Joi.object({
   socketID: Joi.string(),
   locale: Joi.string(),
   picture: Joi.string(),
-  leftReview: Joi.bool(),
 });
 
 export default {
