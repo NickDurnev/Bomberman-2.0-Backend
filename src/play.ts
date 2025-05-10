@@ -10,6 +10,7 @@ import {
 } from "@types";
 import {
   GAME_DURATION,
+  DELETE_PENDING_GAMES_INTERVAL,
   TILE_SIZE,
   INITIAL_POWER,
   INITIAL_DELAY,
@@ -342,6 +343,9 @@ setInterval(() => {
       if (game.isEmpty()) {
         Lobby.deletePendingGame(gameId);
       }
+    }
+    if (now - game.createdAt >= DELETE_PENDING_GAMES_INTERVAL * 1000) {
+      Lobby.deletePendingGame(gameId);
     }
   });
 }, 60 * 1000);
