@@ -21,6 +21,8 @@ export const LOBBY_TIMEOUT = 180; // 3 minutes
 
 export const GAME_DURATION = 180; // 3 minutes
 
+export const DELETE_PENDING_GAMES_INTERVAL = 3600; // 1 hour
+
 export const POINTS_PER_KILL = 1;
 export const POINTS_PER_WIN = 3;
 export const POINTS_PER_TOP3 = 1;
