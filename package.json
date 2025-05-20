@@ -8,7 +8,10 @@
     "build": "tsc",
     "postbuild": "copyfiles -u 1 src/maps/* dist",
     "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/app.ts",
-    "lint": "eslint .",
+    "lint:fix": "biome lint --write .",
+    "lint-staged": "lint-staged",
+    "format": "biome format .",
+    "format:fix": "biome format --write .",
     "prepare": "husky"
   },
   "_moduleAliases": {
@@ -40,6 +43,10 @@
     "uuid": "^10.0.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@commitlint/types": "^19.8.1",
     "@types/express": "^5.0.0",
     "@types/node": "^22.8.7",
     "@types/node-cron": "^3.0.11",
@@ -47,8 +54,15 @@
     "@types/uuid": "^10.0.0",
     "concurrently": "^9.1.0",
     "husky": "^9.1.7",
+    "lint-staged": "^16.0.0",
     "nodemon": "^3.1.7",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "biome lint --write",
+      "biome format --write"
+    ]
   }
 }
