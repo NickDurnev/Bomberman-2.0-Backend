@@ -1,16 +1,18 @@
-import {
-  DESTRUCTIBLE_CELL,
-  NON_DESTRUCTIBLE_CELL,
-  SPOIL_CHANCE,
-  SMALL_MAP_PORTAL_SPAWNS,
-  DEFAULT_MAP_PORTAL_SPAWNS,
-} from "../constants";
-import { Spoil } from "./spoil";
-import { Portal } from "./portal";
 import { v4 as uuidv4 } from "uuid";
 
+import {
+  DEFAULT_MAP_PORTAL_SPAWNS,
+  DESTRUCTIBLE_CELL,
+  NON_DESTRUCTIBLE_CELL,
+  SMALL_MAP_PORTAL_SPAWNS,
+  SPOIL_CHANCE,
+} from "@constants";
+import { Game } from "@entity/game";
+import { Portal } from "@entity/portal";
+import { Spoil } from "@entity/spoil";
+
 type BombConfig = {
-  game: any;
+  game: Game;
   col: number;
   row: number;
   power: number;
@@ -28,7 +30,7 @@ type BlastedCell = {
 
 export class Bomb {
   id: string;
-  game: any;
+  game: Game;
   power: number;
   delay: number;
   col: number;
@@ -90,7 +92,7 @@ export class Bomb {
     row: number,
     col: number,
     direction: string,
-    destroyed: boolean
+    destroyed: boolean,
   ) {
     let isPortal = false;
     let portalSpawns = DEFAULT_MAP_PORTAL_SPAWNS;
@@ -99,7 +101,7 @@ export class Bomb {
     }
     if (this.game.isPortalsEnabled) {
       isPortal = portalSpawns.some(
-        (portal) => portal.row === row && portal.col === col
+        portal => portal.row === row && portal.col === col,
       );
     }
 

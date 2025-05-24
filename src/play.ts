@@ -1,25 +1,28 @@
+import { BroadcastOperator, DefaultEventsMap } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
+
 import { Game } from "@entity/game";
 import {
-  UserDetails,
-  SpoilDetails,
-  PortalDetails,
-  PlayerPositionData,
   BombDetails,
   NewGamePayload,
+  PlayerPositionData,
+  PortalDetails,
+  SpoilDetails,
+  UserDetails,
 } from "@types";
-import {
-  GAME_DURATION,
-  DELETE_PENDING_GAMES_INTERVAL,
-  TILE_SIZE,
-  INITIAL_POWER,
-  INITIAL_DELAY,
-  NO_KILL_PHRASES,
-} from "./constants";
-import { getRandomItem } from "./utils";
-import Lobby from "./lobby";
-import Player from "./entity/player";
+
 import { serverSocket } from "./app";
+import {
+  DELETE_PENDING_GAMES_INTERVAL,
+  GAME_DURATION,
+  INITIAL_DELAY,
+  INITIAL_POWER,
+  NO_KILL_PHRASES,
+  TILE_SIZE,
+} from "./constants";
+import Player from "./entity/player";
+import Lobby from "./lobby";
+import { getRandomItem } from "./utils";
 
 type EndGameArgs = {
   game_id: string;
@@ -34,9 +37,13 @@ class Play {
   socket_game_id: string | null = null;
   id: string;
   leave: (gameId: string) => void;
-  broadcast: any;
+  broadcast: BroadcastOperator<DefaultEventsMap, DefaultEventsMap>;
 
-  constructor(id: string, leave: (gameId: string) => void, broadcast: any) {
+  constructor(
+    id: string,
+    leave: (gameId: string) => void,
+    broadcast: BroadcastOperator<DefaultEventsMap, DefaultEventsMap>,
+  ) {
     this.id = id;
     this.leave = leave;
     this.broadcast = broadcast;
@@ -60,7 +67,9 @@ class Play {
     this.socket_game_id = game_id;
 
     const game = Lobby.deletePendingGame(this.socket_game_id);
-    if (!game) return; // Type check to ensure `game` is defined
+    if (!game) {
+      return;
+    }
     runningGames.set(game.id, game);
 
     this.endGame({
@@ -89,7 +98,9 @@ class Play {
     delay,
   }: EndGameArgs) {
     const currentGame = runningGames.get(game_id);
-    if (!currentGame) return;
+    if (!currentGame) {
+      return;
+    }
 
     if (isProcessStats) {
       await currentGame.processGameStats(winnerId);
@@ -145,10 +156,12 @@ class Play {
 
   createBomb({ col, row, playerId, gameId }: UserDetails) {
     const currentGame = runningGames.get(gameId);
-    if (!currentGame) return;
+    if (!currentGame) {
+      return;
+    }
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === playerId,
+      player => player.id === playerId,
     );
     const bomb = currentGame.addBomb({
       col,
@@ -173,7 +186,9 @@ class Play {
 
   detonateBomb({ bomb_id, playerId, gameId }: BombDetails) {
     const currentGame = runningGames.get(gameId);
-    if (!currentGame) return;
+    if (!currentGame) {
+      return;
+    }
 
     const bomb = currentGame.bombs.get(bomb_id);
     if (bomb) {
@@ -189,7 +204,7 @@ class Play {
   }
 
   addKillPhrases(currentGame: Game) {
-    const players = currentGame.players.map((player) => {
+    const players = currentGame.players.map(player => {
       if (player.kills.length > 0) {
         return player;
       } else {
@@ -214,10 +229,12 @@ class Play {
 
   onPickUpSpoil({ spoil_id, playerId, gameId }: SpoilDetails) {
     const currentGame = runningGames.get(gameId);
-    if (!currentGame) return;
+    if (!currentGame) {
+      return;
+    }
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === playerId,
+      player => player.id === playerId,
     );
     const spoil = currentGame.findSpoil(spoil_id);
 
@@ -235,19 +252,25 @@ class Play {
 
   onUsePortal({ portal_id, playerId, gameId }: PortalDetails) {
     const currentGame = runningGames.get(gameId);
-    if (!currentGame) return;
+    if (!currentGame) {
+      return;
+    }
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === playerId,
+      player => player.id === playerId,
     );
     const portals = Array.from(currentGame.getPortals().values());
-    if (portals.length <= 1) return;
+    if (portals.length <= 1) {
+      return;
+    }
 
     const currentPortal = currentGame.findPortal(portal_id);
-    if (!currentPortal) return;
+    if (!currentPortal) {
+      return;
+    }
 
     // Filter out the current portal
-    const otherPortals = portals.filter((portal) => portal.id !== portal_id);
+    const otherPortals = portals.filter(portal => portal.id !== portal_id);
 
     // Randomly select another portal
     const randomIndex = Math.floor(Math.random() * otherPortals.length);
@@ -268,7 +291,9 @@ class Play {
 
   onPlayerDied({ col, row, playerId, gameId, killerId }: UserDetails) {
     const currentGame = runningGames.get(gameId);
-    if (!currentGame) return;
+    if (!currentGame) {
+      return;
+    }
 
     const tombId = uuidv4();
 
@@ -279,12 +304,12 @@ class Play {
       .emit("show tombstone", { player_id: playerId, tombId, col, row });
 
     const currentPlayer = currentGame.players.find(
-      (player) => player.id === playerId,
+      player => player.id === playerId,
     );
     currentPlayer?.dead();
 
     const currentKiller = currentGame.players.find(
-      (player) => player.id === killerId,
+      player => player.id === killerId,
     );
     currentKiller?.kill(playerId);
 
@@ -299,7 +324,7 @@ class Play {
     }
 
     if (alivePlayersCount === 3) {
-      currentGame.players.forEach((player) => {
+      currentGame.players.forEach(player => {
         player.top3();
       });
     }

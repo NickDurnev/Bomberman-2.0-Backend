@@ -1,8 +1,12 @@
-import { connection } from "../db";
-import cloudinary from "@services/cloudinary";
-import User from "@db/models/User";
+import { Request, Response } from "express";
 
-export async function login(req: any, res: any) {
+import User from "@db/models/User";
+import cloudinary from "@services/cloudinary";
+import { CustomError } from "@types";
+
+import { connection } from "../db";
+
+export async function login(req: Request, res: Response) {
   const { email, picture } = req.body;
   const transformedURL = await transformUrl(picture);
   const uploadResult = await cloudinary.uploader.upload(transformedURL, {
@@ -36,8 +40,17 @@ export async function login(req: any, res: any) {
         newUser,
       },
     });
-  } catch (error: any) {
-    res.status(error.status).json({ success: false, message: error.message });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      const customError = error as CustomError;
+      res
+        .status(customError.status || 500)
+        .json({ success: false, message: error.message });
+    } else {
+      res
+        .status(500)
+        .json({ success: false, message: "An unknown error occurred" });
+    }
   }
 }
 

@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 // Load environment variables
 dotenv.config();
@@ -11,8 +11,10 @@ const connection = async () => {
     mongoose.set("strictQuery", false);
     await mongoose.connect(contactsDB);
     console.log("MongoDB Connected...");
-  } catch (err: any) {
-    console.error(err.message);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.error(err.message);
+    }
     // Terminate the process with a failure code
     process.exit(1);
   }

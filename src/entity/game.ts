@@ -1,16 +1,17 @@
 import { v4 as uuidv4 } from "uuid";
-import { getUserBySocketId } from "@services/socket";
-import { User, NewGamePayload } from "@types";
+
 import {
-  TILE_SIZE,
-  EMPTY_CELL,
   DESTRUCTIBLE_CELL,
+  EMPTY_CELL,
   NON_DESTRUCTIBLE_CELL,
-} from "../constants";
-import Player from "./player";
-import { Bomb } from "./bomb";
-import { Spoil } from "./spoil";
-import { Portal } from "./portal";
+  TILE_SIZE,
+} from "@constants";
+import { Bomb } from "@entity/bomb";
+import Player from "@entity/player";
+import { Portal } from "@entity/portal";
+import { Spoil } from "@entity/spoil";
+import { getUserBySocketId } from "@services/socket";
+import { NewGamePayload, User } from "@types";
 
 // Assuming the type structure of `layer_info` from the map JSON file
 interface LayerInfo {
@@ -71,7 +72,7 @@ export class Game {
     const user = await this.getUserInfo(id);
 
     const existPlayer = this.players.find(
-      (player) => player.name === user?.name && player.skin === user?.picture
+      player => player.name === user?.name && player.skin === user?.picture,
     );
 
     if (existPlayer) {
@@ -98,7 +99,7 @@ export class Game {
   }
 
   removePlayer(id: string) {
-    const player = this.players.find((player) => player.id === id);
+    const player = this.players.find(player => player.id === id);
     if (player) {
       this.playerSpawns.push(player.spawnOnGrid);
       this.players.splice(this.players.indexOf(player), 1);
@@ -120,7 +121,7 @@ export class Game {
 
   private getAndRemoveSpawn(): [
     { x: number; y: number },
-    { row: number; col: number }
+    { row: number; col: number },
   ] {
     const index = Math.floor(Math.random() * this.playerSpawns.length);
     const spawnOnGrid = this.playerSpawns[index];
@@ -137,7 +138,7 @@ export class Game {
       data: tiles,
       width,
       height,
-      properties: { empty, wall, box },
+      properties: { wall, box },
     } = this.layer_info;
     const mapMatrix: number[][] = [];
     let i = 0;
@@ -169,7 +170,9 @@ export class Game {
     delay: number;
   }): Bomb | false {
     const bomb = new Bomb({ game: this, col, row, power, delay });
-    if (this.bombs.has(bomb.id)) return false;
+    if (this.bombs.has(bomb.id)) {
+      return false;
+    }
     this.bombs.set(bomb.id, bomb);
     return bomb;
   }
@@ -194,11 +197,11 @@ export class Game {
     return this.portals;
   }
 
-  addSpoil(spoil: any) {
+  addSpoil(spoil: Spoil) {
     this.spoils.set(spoil.id, spoil);
   }
 
-  addPortal(portal: any) {
+  addPortal(portal: Portal) {
     this.portals.set(portal.id, portal);
   }
 
