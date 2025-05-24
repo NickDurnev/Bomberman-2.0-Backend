@@ -1,6 +1,6 @@
-import { connection } from "../db";
 import PlayStats from "@db/models/PlayStats";
 import User from "@db/models/User";
+import { connection } from "../db";
 
 type updatePlayerArgs = {
   userId: string;
@@ -51,7 +51,7 @@ export const updatePlayerStats = async ({
             wins: isWin ? playerStats.wins + 1 : playerStats.wins,
             top3: isTop3 ? playerStats.top3 + 1 : playerStats.top3,
           },
-        }
+        },
       );
     } else {
       const user = await User.findOne({ socketID: userId });
@@ -64,8 +64,10 @@ export const updatePlayerStats = async ({
         games: 1,
       });
     }
-  } catch (error: any) {
-    console.log(error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
   }
 };
 

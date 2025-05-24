@@ -64,9 +64,12 @@ export type Player = {
   spawnOnGrid: SpawnOnGrid;
 };
 
-// Extend the Socket type to include `playInstance`
 export interface CustomSocket extends Socket {
   customId?: string;
   playInstance?: Play;
   socket_game_id?: string | null;
+}
+
+export interface CustomError extends Error {
+  status?: number;
 }

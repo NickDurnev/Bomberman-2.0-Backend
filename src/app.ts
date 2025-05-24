@@ -1,18 +1,20 @@
 require("module-alias/register");
-import express from "express";
-import cron from "node-cron";
-import cors from "cors";
-import { Server } from "socket.io";
 import http from "http";
 import path from "path";
+import cors from "cors";
+import express from "express";
+import cron from "node-cron";
+import { Server } from "socket.io";
 
+import { Game } from "@entity/game";
 import { storeSocketID } from "@services/socket";
 import { deleteAllStats } from "@services/stats";
 import { CustomSocket } from "@types";
-import router from "./routes/index";
+
 import { connection } from "./db";
 import Lobby from "./lobby";
 import Play from "./play";
+import router from "./routes/index";
 
 const corsOptions = {
   origin: [
@@ -37,7 +39,7 @@ export const serverSocket = new Server(server, {
 // Use static files from the client directory
 app.use(express.static(path.join(__dirname, "..", "client")));
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   res.sendStatus(200);
 });
 
@@ -59,15 +61,10 @@ const start = async () => {
 
     serverSocket.sockets.on("connection", (client: CustomSocket) => {
       //update user socket id
-      client.on("updateUserSocketId", async (req, callback) => {
+      client.on("updateUserSocketId", async req => {
         await storeSocketID(req.email, req.socket_id);
 
         client.customId = req.socket_id;
-
-        callback({
-          status: 200,
-          message: "Socket id updated successfully",
-        });
       });
 
       // Create a new Play instance and store it on the client object
@@ -76,7 +73,7 @@ const start = async () => {
         (gameId: string) => {
           client.leave(gameId);
         },
-        serverSocket.to(client.id)
+        serverSocket.to(client.id),
       );
 
       // Store the Play instance on the client object
@@ -93,45 +90,45 @@ const start = async () => {
       // Play event handlers using the `Play` instance
       client.on(
         "get current game",
-        (game_id: string, callback: (game: any) => void) => {
+        (game_id: string, callback: (game: Game | undefined) => void) => {
           const game = playerPlayInstance.onGetCurrentGame(game_id);
           callback(game); // Send the game data back to the client
-        }
+        },
       );
       client.on("start timer", (game_id: string) =>
-        playerPlayInstance.onStartTimer(game_id)
+        playerPlayInstance.onStartTimer(game_id),
       );
       client.on("start game", (game_id: string) =>
-        playerPlayInstance.onStartGame(game_id)
+        playerPlayInstance.onStartGame(game_id),
       );
-      client.on("update player position", (data) =>
-        playerPlayInstance.updatePlayerPosition(data)
+      client.on("update player position", data =>
+        playerPlayInstance.updatePlayerPosition(data),
       );
-      client.on("create bomb", (bombDetails) =>
-        playerPlayInstance.createBomb(bombDetails)
+      client.on("create bomb", bombDetails =>
+        playerPlayInstance.createBomb(bombDetails),
       );
-      client.on("detonate bomb by blast", (bombDetails) =>
-        playerPlayInstance.onBlastVsBomb(bombDetails)
+      client.on("detonate bomb by blast", bombDetails =>
+        playerPlayInstance.onBlastVsBomb(bombDetails),
       );
-      client.on("pick up spoil", (spoilDetails) =>
-        playerPlayInstance.onPickUpSpoil(spoilDetails)
+      client.on("pick up spoil", spoilDetails =>
+        playerPlayInstance.onPickUpSpoil(spoilDetails),
       );
-      client.on("use portal", (portalDetails) =>
-        playerPlayInstance.onUsePortal(portalDetails)
+      client.on("use portal", portalDetails =>
+        playerPlayInstance.onUsePortal(portalDetails),
       );
-      client.on("player died", (data) => playerPlayInstance.onPlayerDied(data));
+      client.on("player died", data => playerPlayInstance.onPlayerDied(data));
       client.on("leave game", () => playerPlayInstance.onLeaveGame());
 
-      client.on("player disconnect", (data) =>
-        playerPlayInstance.onDisconnectFromGame(data.player_id)
+      client.on("player disconnect", data =>
+        playerPlayInstance.onDisconnectFromGame(data.player_id),
       );
 
-      client.on("joinRoom", (data) => {
+      client.on("joinRoom", data => {
         const { room_id } = data;
         client.join(room_id);
       });
 
-      client.on("leaveRoom", (data) => {
+      client.on("leaveRoom", data => {
         const { room_id } = data;
         client.leave(room_id);
       });
@@ -153,8 +150,12 @@ const start = async () => {
         client.playInstance.onDisconnectFromGame(client.customId || "");
       }
     }
-  } catch (error: any) {
-    console.log(`Server not running. Error message: ${error.message}`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.log(`Server not running. Error message: ${error.message}`);
+    } else {
+      console.log("Server not running due to an unknown error");
+    }
     process.exit(1);
   }
 };
