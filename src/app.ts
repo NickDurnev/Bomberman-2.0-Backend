@@ -61,15 +61,10 @@ const start = async () => {
 
     serverSocket.sockets.on("connection", (client: CustomSocket) => {
       //update user socket id
-      client.on("updateUserSocketId", async (req, callback) => {
+      client.on("updateUserSocketId", async req => {
         await storeSocketID(req.email, req.socket_id);
 
         client.customId = req.socket_id;
-
-        callback({
-          status: 200,
-          message: "Socket id updated successfully",
-        });
       });
 
       // Create a new Play instance and store it on the client object
