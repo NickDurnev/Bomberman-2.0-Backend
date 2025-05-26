@@ -33,11 +33,22 @@ type EndGameArgs = {
 };
 
 const runningGames: Map<string, Game> = new Map();
+
+// Add bomb queue system
+type BombQueueItem = {
+  bombId: string;
+  playerId: string;
+  gameId: string;
+  detonationTime: number;
+};
+
 class Play {
   socket_game_id: string | null = null;
   id: string;
   leave: (gameId: string) => void;
   broadcast: BroadcastOperator<DefaultEventsMap, DefaultEventsMap>;
+  private bombQueue: Map<string, BombQueueItem[]> = new Map();
+  private bombQueueInterval: NodeJS.Timeout | null = null;
 
   constructor(
     id: string,
@@ -47,12 +58,36 @@ class Play {
     this.id = id;
     this.leave = leave;
     this.broadcast = broadcast;
+    this.startBombQueueProcessor();
+  }
+
+  private startBombQueueProcessor() {
+    // Process bomb queue every 100ms
+    this.bombQueueInterval = setInterval(() => {
+      const now = Date.now();
+      this.bombQueue.forEach((queue, gameId) => {
+        const detonations = queue.filter(item => item.detonationTime <= now);
+        detonations.forEach(item => {
+          this.detonateBomb({
+            bomb_id: item.bombId,
+            playerId: item.playerId,
+            gameId: item.gameId,
+          });
+        });
+        // Remove detonated bombs from queue
+        this.bombQueue.set(
+          gameId,
+          queue.filter(item => item.detonationTime > now),
+        );
+      });
+    }, 100);
   }
 
   onLeaveGame() {
     if (this.socket_game_id) {
+      // Clear bomb queue for this game
+      this.bombQueue.delete(this.socket_game_id);
       runningGames.delete(this.socket_game_id);
-
       this.leave(this.socket_game_id);
       this.socket_game_id = null;
     }
@@ -171,9 +206,16 @@ class Play {
     });
 
     if (bomb) {
-      setTimeout(() => {
-        this.detonateBomb({ bomb_id: bomb.id, playerId, gameId });
-      }, bomb.delay);
+      // Add bomb to queue instead of using setTimeout
+      const detonationTime = Date.now() + bomb.delay;
+      const queue = this.bombQueue.get(gameId) || [];
+      queue.push({
+        bombId: bomb.id,
+        playerId,
+        gameId,
+        detonationTime,
+      });
+      this.bombQueue.set(gameId, queue);
 
       serverSocket.sockets.to(gameId).emit("show bomb", {
         bomb_id: bomb.id,
