@@ -19,8 +19,8 @@ import router from "./routes/index";
 const corsOptions = {
   origin: [
     "http://localhost:3000",
-    "https://www.bomberman.click",
-    "https://dev.bomberman.click",
+    "https://bomberman-2-0.vercel.app",
+    "https://bomberman-2-0-dev.vercel.app",
   ],
   optionsSuccessStatus: 200,
 };
