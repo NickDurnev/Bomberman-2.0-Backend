@@ -7,26 +7,36 @@ import { CustomError } from "@types";
 import { connection } from "../db";
 
 export async function login(req: Request, res: Response) {
-  const { email, picture } = req.body;
-  const transformedURL = await transformUrl(picture);
-  const uploadResult = await cloudinary.uploader.upload(transformedURL, {
-    folder: "users",
-    format: "png",
-  });
-  const pictureUrl = uploadResult.secure_url;
-  await connection();
   try {
+    const { email, picture } = req.body;
+    // Cloudinary upload and DB connect run inside the try block — previously they
+    // ran before it, so a failed upload/connect escaped the handler as an
+    // unhandled rejection and the request hung with no response.
+    const transformedURL = transformUrl(picture);
+    const uploadResult = await cloudinary.uploader.upload(transformedURL, {
+      folder: "users",
+      format: "png",
+    });
+    const pictureUrl = uploadResult.secure_url;
+    await connection();
+
     const user = await User.findOne({ email });
     if (user) {
-      const publicId = user.picture.split("/").pop()?.split(".")[0]; // Extract public ID
-      await cloudinary.uploader.destroy(`users/${publicId}`);
+      const publicId = user.picture?.split("/").pop()?.split(".")[0]; // Extract public ID
+      if (publicId) {
+        await cloudinary.uploader.destroy(`users/${publicId}`);
+      }
 
-      await User.findOneAndUpdate({ email }, { picture: pictureUrl });
+      const updatedUser = await User.findOneAndUpdate(
+        { email },
+        { picture: pictureUrl },
+        { new: true },
+      );
       res.json({
         status: "success",
         code: 200,
         data: {
-          user,
+          user: updatedUser,
         },
       });
       return;
