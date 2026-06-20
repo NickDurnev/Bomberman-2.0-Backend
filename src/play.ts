@@ -83,6 +83,16 @@ class Play {
     }, 100);
   }
 
+  // Release the per-connection bomb-queue interval. Must be called when the
+  // socket disconnects, otherwise every connection leaks a 100ms timer forever.
+  destroy() {
+    if (this.bombQueueInterval) {
+      clearInterval(this.bombQueueInterval);
+      this.bombQueueInterval = null;
+    }
+    this.bombQueue.clear();
+  }
+
   onLeaveGame() {
     if (this.socket_game_id) {
       // Clear bomb queue for this game

@@ -60,7 +60,22 @@ const start = async () => {
     });
 
     serverSocket.sockets.on("connection", (client: CustomSocket) => {
-      //update user socket id
+      // Identity is provided in the handshake, so it is known synchronously here
+      // — before any lobby/gameplay event handler can run. This removes the race
+      // where a player joined a game or acted before "updateUserSocketId" was
+      // processed, and re-establishes identity on every reconnect.
+      const handshakeAuth = client.handshake.auth as {
+        socketId?: string;
+        email?: string;
+      };
+      if (handshakeAuth.socketId) {
+        client.customId = handshakeAuth.socketId;
+        if (handshakeAuth.email) {
+          storeSocketID(handshakeAuth.email, handshakeAuth.socketId);
+        }
+      }
+
+      //update user socket id (covers users who log in mid-session)
       client.on("updateUserSocketId", async req => {
         await storeSocketID(req.email, req.socket_id);
 
@@ -138,6 +153,11 @@ const start = async () => {
     });
 
     function onClientDisconnect(client: CustomSocket) {
+      // Always release the per-connection bomb-queue interval, even for sockets
+      // that only visited the lobby and never joined a game — otherwise every
+      // connection leaks a 100ms timer.
+      client.playInstance?.destroy();
+
       if (client.socket_game_id == null) {
         return;
       }

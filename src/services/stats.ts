@@ -41,29 +41,24 @@ export const updatePlayerStats = async ({
 }: updatePlayerArgs) => {
   await connection();
   try {
-    const playerStats = await PlayStats.findOne({ userId });
-    if (playerStats) {
-      await PlayStats.findOneAndUpdate(
-        { userId },
-        {
-          $inc: { games: 1, points, kills },
-          $set: {
-            wins: isWin ? playerStats.wins + 1 : playerStats.wins,
-            top3: isTop3 ? playerStats.top3 + 1 : playerStats.top3,
-          },
+    const user = await User.findOne({ socketID: userId });
+    // Single atomic upsert: read-then-write was racy (lost wins/top3 updates and
+    // duplicate-key errors when two game-ends for the same user interleaved).
+    // $inc handles both create and update; userName is only set on insert.
+    await PlayStats.findOneAndUpdate(
+      { userId },
+      {
+        $inc: {
+          games: 1,
+          points,
+          kills,
+          wins: isWin ? 1 : 0,
+          top3: isTop3 ? 1 : 0,
         },
-      );
-    } else {
-      const user = await User.findOne({ socketID: userId });
-      await PlayStats.create({
-        userId,
-        userName: user.name,
-        points,
-        kills,
-        wins: isWin,
-        games: 1,
-      });
-    }
+        $setOnInsert: { userName: user?.name ?? "Unknown" },
+      },
+      { upsert: true, new: true },
+    );
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error.message);
