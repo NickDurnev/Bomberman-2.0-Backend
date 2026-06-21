@@ -58,8 +58,12 @@ jobs:
             rm -rf dist
 
             echo "Installing dependencies..."
-            npm install --production
-            npm install --save-dev @types/express @types/node-cron @types/uuid
+            # --ignore-scripts: the package "prepare" script runs husky, which is
+            # a devDependency and absent in a production install — without this it
+            # exits 127 ("husky: not found"). We don't want git hooks on the server
+            # anyway. (Previously this error was silently ignored.)
+            npm install --production --ignore-scripts
+            npm install --save-dev --ignore-scripts @types/express @types/node-cron @types/uuid
 
             echo "Building the application..."
             npm run build
