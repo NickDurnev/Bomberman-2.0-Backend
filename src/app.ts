@@ -16,9 +16,16 @@ import Lobby from "./lobby";
 import Play from "./play";
 import router from "./routes/index";
 
+// Allow every origin the app is served from. dev and main previously carried
+// different, mutually-exclusive allowlists, so a frontend hosted on one domain
+// was blocked when it called a backend built from the other branch. Keep a
+// single inclusive list of all known frontend origins.
 const corsOptions = {
   origin: [
     "http://localhost:3000",
+    "https://bomberman-2-0.vercel.app",
+    "https://bomberman-2-0-dev.vercel.app",
+    "https://bomberman.click",
     "https://www.bomberman.click",
     "https://dev.bomberman.click",
   ],
