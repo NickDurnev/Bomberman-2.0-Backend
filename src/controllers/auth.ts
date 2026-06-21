@@ -9,15 +9,11 @@ import { connection } from "../db";
 export async function login(req: Request, res: Response) {
   try {
     const { email, picture } = req.body;
-    // Cloudinary upload and DB connect run inside the try block — previously they
-    // ran before it, so a failed upload/connect escaped the handler as an
-    // unhandled rejection and the request hung with no response.
-    const transformedURL = transformUrl(picture);
-    const uploadResult = await cloudinary.uploader.upload(transformedURL, {
-      folder: "users",
-      format: "png",
-    });
-    const pictureUrl = uploadResult.secure_url;
+    // Avatar handling must never block account creation. Throwaway/incognito
+    // Google accounts can have no profile photo (empty picture), and Cloudinary
+    // can fail — in both cases fall back to the source URL (or empty) instead of
+    // failing the whole request, which previously left the user uncreated.
+    const pictureUrl = await uploadAvatar(picture);
     await connection();
 
     const user = await User.findOne({ email });
@@ -61,6 +57,28 @@ export async function login(req: Request, res: Response) {
         .status(500)
         .json({ success: false, message: "An unknown error occurred" });
     }
+  }
+}
+
+// Upload the avatar to Cloudinary, returning the hosted URL. Never throws —
+// returns the source URL (or empty string) if there is no picture or the upload
+// fails, so a missing/broken avatar cannot block account creation.
+async function uploadAvatar(picture?: string): Promise<string> {
+  if (!picture) {
+    return "";
+  }
+  try {
+    const uploadResult = await cloudinary.uploader.upload(
+      transformUrl(picture),
+      {
+        folder: "users",
+        format: "png",
+      },
+    );
+    return uploadResult.secure_url;
+  } catch (error) {
+    console.error("Cloudinary upload failed, using source URL:", error);
+    return picture;
   }
 }
 
