@@ -68,11 +68,21 @@ export class Game {
     this.createdAt = Date.now();
   }
 
-  async addPlayer(id: string) {
-    const user = await this.getUserInfo(id);
+  async addPlayer(id: string, profile?: { name?: string; picture?: string }) {
+    // Prefer the profile the client supplied in its handshake — rendering then
+    // does not depend on a DB lookup that can race with identity storage or be
+    // clobbered when the same account is used in two sessions. Fall back to the
+    // DB only when the client did not provide a profile.
+    let name = profile?.name;
+    let skin = profile?.picture;
+    if (!name || !skin) {
+      const user = await this.getUserInfo(id);
+      name = name || user?.name;
+      skin = skin || user?.picture;
+    }
 
     const existPlayer = this.players.find(
-      player => player.name === user?.name && player.skin === user?.picture,
+      player => player.name === name && player.skin === skin,
     );
 
     if (existPlayer) {
@@ -83,8 +93,8 @@ export class Game {
     const [spawn, spawnOnGrid] = this.getAndRemoveSpawn();
     const player = new Player({
       id,
-      skin: user?.picture || "",
-      name: user?.name || "",
+      skin: skin || "",
+      name: name || "",
       spawn,
       spawnOnGrid,
     });
