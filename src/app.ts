@@ -67,9 +67,15 @@ const start = async () => {
       const handshakeAuth = client.handshake.auth as {
         socketId?: string;
         email?: string;
+        name?: string;
+        picture?: string;
       };
       if (handshakeAuth.socketId) {
         client.customId = handshakeAuth.socketId;
+        // Keep the client's profile on the socket so players render correctly
+        // without depending on a DB lookup at join time.
+        client.userName = handshakeAuth.name;
+        client.userPicture = handshakeAuth.picture;
         if (handshakeAuth.email) {
           storeSocketID(handshakeAuth.email, handshakeAuth.socketId);
         }
@@ -80,6 +86,12 @@ const start = async () => {
         await storeSocketID(req.email, req.socket_id);
 
         client.customId = req.socket_id;
+        if (req.name) {
+          client.userName = req.name;
+        }
+        if (req.picture) {
+          client.userPicture = req.picture;
+        }
       });
 
       // Create a new Play instance and store it on the client object

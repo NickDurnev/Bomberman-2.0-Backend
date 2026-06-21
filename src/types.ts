@@ -66,6 +66,8 @@ export type Player = {
 
 export interface CustomSocket extends Socket {
   customId?: string;
+  userName?: string;
+  userPicture?: string;
   playInstance?: Play;
   socket_game_id?: string | null;
 }

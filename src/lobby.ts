@@ -25,7 +25,7 @@ const Lobby = {
   onCreateGame(
     this: CustomSocket,
     data: NewGamePayload,
-    callback: (data: { game_id: string }) => void
+    callback: (data: { game_id: string }) => void,
   ) {
     const newGame = Lobby.createPendingGame(data);
     newGame.createdAt = Date.now(); // Store timestamp
@@ -44,7 +44,10 @@ const Lobby = {
 
       // Save current game ID in the socket object
       this.socket_game_id = current_game.id;
-      await current_game.addPlayer(this.customId || "");
+      await current_game.addPlayer(this.customId || "", {
+        name: this.userName,
+        picture: this.userPicture,
+      });
 
       if (current_game.isFull()) {
         Lobby.updateLobbyGames();
@@ -94,14 +97,14 @@ const Lobby = {
   },
 
   availablePendingGames() {
-    return Array.from(pendingGames.values()).filter((game) => !game.isFull());
+    return Array.from(pendingGames.values()).filter(game => !game.isFull());
   },
 
   onCheckNameAvailable(
     gameName: string,
-    callback: (data: { isAvailable: boolean }) => void
+    callback: (data: { isAvailable: boolean }) => void,
   ) {
-    const isAvailable = !Array.from(pendingGames.values()).some((game) => {
+    const isAvailable = !Array.from(pendingGames.values()).some(game => {
       return game.name === gameName;
     });
 
