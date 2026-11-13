@@ -22,6 +22,10 @@ Stack: Node.js, Express, socket.io, MongoDB (Mongoose), TypeScript, Biome.
 2. Types: `npx tsc --noEmit`
 3. Build: `npm run build`
 
+`dev` currently has existing Biome (and, frontend, `tsc`) errors. Your change must add no NEW errors: check the files you changed (`npx biome check <changed files>`) and compare `tsc` output with `origin/dev`. Do not fix unrelated errors in the same PR.
+
+There is no test script.
+
 ## Workflow
 
 - Open PRs to `dev`.
