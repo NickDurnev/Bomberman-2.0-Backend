@@ -80,9 +80,18 @@ export class Game {
       name = name || user?.name;
       skin = skin || user?.picture;
     }
+    // Normalize before the re-join check: a player is stored with "" for a
+    // missing name or skin, so comparing against undefined never matched.
+    name = name || "";
+    skin = skin || "";
 
+    // The same id entering again (e.g. a repeated "enter pending game") is a
+    // re-join too, whatever its profile resolved to. A profile match needs a
+    // name, so two players without one are not merged.
     const existPlayer = this.players.find(
-      player => player.name === name && player.skin === skin,
+      player =>
+        player.id === id ||
+        (name !== "" && player.name === name && player.skin === skin),
     );
 
     if (existPlayer) {
@@ -93,8 +102,8 @@ export class Game {
     const [spawn, spawnOnGrid] = this.getAndRemoveSpawn();
     const player = new Player({
       id,
-      skin: skin || "",
-      name: name || "",
+      skin,
+      name,
       spawn,
       spawnOnGrid,
     });
