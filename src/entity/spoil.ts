@@ -1,5 +1,5 @@
-import { SPEED, POWER, BOMBS, DELAY } from "../constants";
 import { v4 as uuidv4 } from "uuid";
+import { BOMBS, DELAY, POWER, SPEED } from "../constants";
 
 export class Spoil {
   id: string;
