@@ -62,6 +62,6 @@
     "ts-node": "^10.9.2"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["biome lint --write", "biome format --write"]
+    "*.{js,jsx,ts,tsx}": ["biome check --write --no-errors-on-unmatched"]
   }
 }
