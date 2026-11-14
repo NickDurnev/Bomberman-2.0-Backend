@@ -12,7 +12,7 @@ const UserSchema = new Schema(
     locale: String,
     picture: String,
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
 const User = models.users || model("users", UserSchema);
