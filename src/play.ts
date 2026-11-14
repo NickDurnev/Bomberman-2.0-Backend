@@ -38,6 +38,11 @@ const runningGames: Map<string, Game> = new Map();
 // game reuses it, so the stats show the same no-kill phrases as the win modal.
 const winGameInfos: Map<string, ReturnType<Play["addKillPhrases"]>> = new Map();
 
+// Games with an end already scheduled. A game ends once: a later end (the
+// winner dies or a player leaves during the win delay, the time limit) is
+// skipped.
+const endingGames: Set<string> = new Set();
+
 // Add bomb queue system
 type BombQueueItem = {
   bombId: string;
@@ -121,17 +126,20 @@ class Play {
     }
     runningGames.set(game.id, game);
 
-    this.endGame({
-      game_id: game.id,
-      gameData: {
-        mapName: game.mapName,
-        gameName: game.name,
-        isPortalsEnabled: game.isPortalsEnabled,
-        isDelaySpoilEnabled: game.isDelaySpoilEnabled,
-      },
-      delay: GAME_DURATION,
-      isProcessStats: false,
-    });
+    // Time limit. endGame skips the game if it already ended.
+    setTimeout(() => {
+      this.endGame({
+        game_id: game.id,
+        gameData: {
+          mapName: game.mapName,
+          gameName: game.name,
+          isPortalsEnabled: game.isPortalsEnabled,
+          isDelaySpoilEnabled: game.isDelaySpoilEnabled,
+        },
+        delay: 0,
+        isProcessStats: false,
+      });
+    }, GAME_DURATION * 1000);
     serverSocket.sockets.in(game.id).emit("launch game", game);
   }
 
@@ -147,12 +155,21 @@ class Play {
     delay,
   }: EndGameArgs) {
     const currentGame = runningGames.get(game_id);
-    if (!currentGame) {
+    if (!currentGame || endingGames.has(game_id)) {
       return;
     }
+    endingGames.add(game_id);
 
     if (isProcessStats) {
-      await currentGame.processGameStats(winnerId);
+      // A stats failure must not block the end: the game is already in
+      // endingGames, so no other end can run for it.
+      try {
+        await currentGame.processGameStats(winnerId);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(error.message);
+        }
+      }
     }
 
     const prevGameInfo =
@@ -162,6 +179,7 @@ class Play {
       const newGame = Lobby.createPendingGame(gameData);
       runningGames.delete(game_id);
       winGameInfos.delete(game_id);
+      endingGames.delete(game_id);
 
       serverSocket.sockets.to(game_id).emit("end game", {
         game_id: game_id,
