@@ -34,6 +34,10 @@ type EndGameArgs = {
 
 const runningGames: Map<string, Game> = new Map();
 
+// The prevGameInfo sent with "player win", per game. Every "end game" of that
+// game reuses it, so the stats show the same no-kill phrases as the win modal.
+const winGameInfos: Map<string, ReturnType<Play["addKillPhrases"]>> = new Map();
+
 // Add bomb queue system
 type BombQueueItem = {
   bombId: string;
@@ -151,11 +155,13 @@ class Play {
       await currentGame.processGameStats(winnerId);
     }
 
-    const prevGameInfo = this.addKillPhrases(currentGame);
+    const prevGameInfo =
+      winGameInfos.get(game_id) ?? this.addKillPhrases(currentGame);
 
     setTimeout(() => {
       const newGame = Lobby.createPendingGame(gameData);
       runningGames.delete(game_id);
+      winGameInfos.delete(game_id);
 
       serverSocket.sockets.to(game_id).emit("end game", {
         game_id: game_id,
@@ -391,6 +397,7 @@ class Play {
     const prevGameInfo = this.addKillPhrases(currentGame);
 
     if (alivePlayersCount < 2 && alivePlayer) {
+      winGameInfos.set(gameId, prevGameInfo);
       serverSocket.sockets
         .to(gameId)
         .emit("player win", { winner: alivePlayer, prevGameInfo });
