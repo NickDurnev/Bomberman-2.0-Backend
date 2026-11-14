@@ -161,7 +161,15 @@ class Play {
     endingGames.add(game_id);
 
     if (isProcessStats) {
-      await currentGame.processGameStats(winnerId);
+      // A stats failure must not block the end: the game is already in
+      // endingGames, so no other end can run for it.
+      try {
+        await currentGame.processGameStats(winnerId);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(error.message);
+        }
+      }
     }
 
     const prevGameInfo =
