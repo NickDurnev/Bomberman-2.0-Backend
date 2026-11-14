@@ -12,6 +12,8 @@
     "lint-staged": "lint-staged",
     "format": "biome format .",
     "format:fix": "biome format --write .",
+    "check": "biome ci .",
+    "typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
   "_moduleAliases": {
