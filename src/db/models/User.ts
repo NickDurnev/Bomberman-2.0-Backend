@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import { model, models, Schema } from "mongoose";
 
 const UserSchema = new Schema(
   {
@@ -12,7 +12,7 @@ const UserSchema = new Schema(
     locale: String,
     picture: String,
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
 const User = models.users || model("users", UserSchema);

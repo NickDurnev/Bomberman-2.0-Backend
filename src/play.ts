@@ -1,6 +1,3 @@
-import { BroadcastOperator, DefaultEventsMap } from "socket.io";
-import { v4 as uuidv4 } from "uuid";
-
 import { Game } from "@entity/game";
 import {
   BombDetails,
@@ -10,8 +7,9 @@ import {
   SpoilDetails,
   UserDetails,
 } from "@types";
+import { BroadcastOperator, DefaultEventsMap } from "socket.io";
+import { v4 as uuidv4 } from "uuid";
 
-import { serverSocket } from "./app";
 import {
   DELETE_PENDING_GAMES_INTERVAL,
   GAME_DURATION,
@@ -21,6 +19,7 @@ import {
   TILE_SIZE,
 } from "./constants";
 import Player from "./entity/player";
+import { getIo } from "./io";
 import Lobby from "./lobby";
 import { getRandomItem } from "./utils";
 
@@ -33,6 +32,15 @@ type EndGameArgs = {
 };
 
 const runningGames: Map<string, Game> = new Map();
+
+// The prevGameInfo sent with "player win", per game. Every "end game" of that
+// game reuses it, so the stats show the same no-kill phrases as the win modal.
+const winGameInfos: Map<string, ReturnType<Play["addKillPhrases"]>> = new Map();
+
+// Games with an end already scheduled. A game ends once: a later end (the
+// winner dies or a player leaves during the win delay, the time limit) is
+// skipped.
+const endingGames: Set<string> = new Set();
 
 // Add bomb queue system
 type BombQueueItem = {
@@ -105,7 +113,7 @@ class Play {
 
   onStartTimer(game_id: string) {
     this.socket_game_id = game_id;
-    serverSocket.sockets.in(game_id).emit("start timer");
+    getIo().sockets.in(game_id).emit("start timer");
   }
 
   onStartGame(game_id: string) {
@@ -117,18 +125,21 @@ class Play {
     }
     runningGames.set(game.id, game);
 
-    this.endGame({
-      game_id: game.id,
-      gameData: {
-        mapName: game.mapName,
-        gameName: game.name,
-        isPortalsEnabled: game.isPortalsEnabled,
-        isDelaySpoilEnabled: game.isDelaySpoilEnabled,
-      },
-      delay: GAME_DURATION,
-      isProcessStats: false,
-    });
-    serverSocket.sockets.in(game.id).emit("launch game", game);
+    // Time limit. endGame skips the game if it already ended.
+    setTimeout(() => {
+      this.endGame({
+        game_id: game.id,
+        gameData: {
+          mapName: game.mapName,
+          gameName: game.name,
+          isPortalsEnabled: game.isPortalsEnabled,
+          isDelaySpoilEnabled: game.isDelaySpoilEnabled,
+        },
+        delay: 0,
+        isProcessStats: false,
+      });
+    }, GAME_DURATION * 1000);
+    getIo().sockets.in(game.id).emit("launch game", game);
   }
 
   onGetCurrentGame(game_id: string) {
@@ -143,21 +154,33 @@ class Play {
     delay,
   }: EndGameArgs) {
     const currentGame = runningGames.get(game_id);
-    if (!currentGame) {
+    if (!currentGame || endingGames.has(game_id)) {
       return;
     }
+    endingGames.add(game_id);
 
     if (isProcessStats) {
-      await currentGame.processGameStats(winnerId);
+      // A stats failure must not block the end: the game is already in
+      // endingGames, so no other end can run for it.
+      try {
+        await currentGame.processGameStats(winnerId);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error(error.message);
+        }
+      }
     }
 
-    const prevGameInfo = this.addKillPhrases(currentGame);
+    const prevGameInfo =
+      winGameInfos.get(game_id) ?? this.addKillPhrases(currentGame);
 
     setTimeout(() => {
       const newGame = Lobby.createPendingGame(gameData);
       runningGames.delete(game_id);
+      winGameInfos.delete(game_id);
+      endingGames.delete(game_id);
 
-      serverSocket.sockets.to(game_id).emit("end game", {
+      getIo().sockets.to(game_id).emit("end game", {
         game_id: game_id,
         new_game_id: newGame.id,
         prevGameInfo,
@@ -192,8 +215,8 @@ class Play {
           isProcessStats: false,
         });
       } else {
-        serverSocket.sockets
-          .in(this.socket_game_id)
+        getIo()
+          .sockets.in(this.socket_game_id)
           .emit("player disconnect", { player_id: playerId });
       }
     }
@@ -227,7 +250,7 @@ class Play {
       });
       this.bombQueue.set(gameId, queue);
 
-      serverSocket.sockets.to(gameId).emit("show bomb", {
+      getIo().sockets.to(gameId).emit("show bomb", {
         bomb_id: bomb.id,
         playerId,
         col: bomb.col,
@@ -247,7 +270,7 @@ class Play {
       const blastedCells = bomb.detonate();
       currentGame.deleteBomb(bomb_id);
 
-      serverSocket.sockets.to(gameId).emit("detonate bomb", {
+      getIo().sockets.to(gameId).emit("detonate bomb", {
         bomb_id: bomb.id,
         playerId,
         blastedCells,
@@ -294,7 +317,7 @@ class Play {
       currentGame.deleteSpoil(spoil.id);
       currentPlayer?.pickSpoil(spoil.spoil_type);
 
-      serverSocket.sockets.to(gameId).emit("spoil was picked", {
+      getIo().sockets.to(gameId).emit("spoil was picked", {
         player_id: currentPlayer?.id,
         spoil_id: spoil.id,
         spoil_type: spoil.spoil_type,
@@ -333,11 +356,13 @@ class Play {
 
     if (randomPortal) {
       //Update player position
-      serverSocket.sockets.to(gameId).emit("teleport player", {
-        player_id: currentPlayer?.id,
-        x: col * TILE_SIZE + TILE_SIZE / 2,
-        y: row * TILE_SIZE + TILE_SIZE / 2,
-      });
+      getIo()
+        .sockets.to(gameId)
+        .emit("teleport player", {
+          player_id: currentPlayer?.id,
+          x: col * TILE_SIZE + TILE_SIZE / 2,
+          y: row * TILE_SIZE + TILE_SIZE / 2,
+        });
     }
   }
 
@@ -351,8 +376,8 @@ class Play {
 
     currentGame.addTombStone({ tombId, row, col });
 
-    serverSocket.sockets
-      .to(gameId)
+    getIo()
+      .sockets.to(gameId)
       .emit("show tombstone", { player_id: playerId, tombId, col, row });
 
     const currentPlayer = currentGame.players.find(
@@ -391,8 +416,9 @@ class Play {
     const prevGameInfo = this.addKillPhrases(currentGame);
 
     if (alivePlayersCount < 2 && alivePlayer) {
-      serverSocket.sockets
-        .to(gameId)
+      winGameInfos.set(gameId, prevGameInfo);
+      getIo()
+        .sockets.to(gameId)
         .emit("player win", { winner: alivePlayer, prevGameInfo });
       this.endGame({
         game_id: gameId,
@@ -425,6 +451,6 @@ setInterval(() => {
       Lobby.deletePendingGame(gameId);
     }
   });
-}, 60 * 1000);
+}, 60 * 1000).unref();
 
 export default Play;

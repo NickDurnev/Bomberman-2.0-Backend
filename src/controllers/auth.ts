@@ -1,8 +1,7 @@
-import { Request, Response } from "express";
-
 import User from "@db/models/User";
 import cloudinary from "@services/cloudinary";
 import { CustomError } from "@types";
+import { Request, Response } from "express";
 
 import { connection } from "../db";
 
@@ -26,7 +25,7 @@ export async function login(req: Request, res: Response) {
       const updatedUser = await User.findOneAndUpdate(
         { email },
         { picture: pictureUrl },
-        { new: true },
+        { returnDocument: "after" },
       );
       res.json({
         status: "success",

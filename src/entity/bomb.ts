@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
-
 import {
   DEFAULT_MAP_PORTAL_SPAWNS,
   DESTRUCTIBLE_CELL,
@@ -10,6 +8,7 @@ import {
 import { Game } from "@entity/game";
 import { Portal } from "@entity/portal";
 import { Spoil } from "@entity/spoil";
+import { v4 as uuidv4 } from "uuid";
 
 type BombConfig = {
   game: Game;

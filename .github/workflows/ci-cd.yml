@@ -63,7 +63,7 @@ jobs:
             # exits 127 ("husky: not found"). We don't want git hooks on the server
             # anyway. (Previously this error was silently ignored.)
             npm install --production --ignore-scripts
-            npm install --save-dev --ignore-scripts @types/express @types/node-cron @types/uuid
+            npm install --save-dev --ignore-scripts @types/express
 
             echo "Building the application..."
             npm run build

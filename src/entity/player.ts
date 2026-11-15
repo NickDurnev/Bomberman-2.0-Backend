@@ -1,17 +1,18 @@
+import { updatePlayerStats } from "@services/stats";
+import { Player as IPlayer, Spawn, SpawnOnGrid } from "@types";
 import {
-  POWER,
-  INITIAL_POWER,
-  STEP_POWER,
   DELAY,
   INITIAL_DELAY,
-  STEP_DELAY,
+  INITIAL_POWER,
   MIN_DELAY,
   POINTS_PER_KILL,
-  POINTS_PER_WIN,
   POINTS_PER_TOP3,
+  POINTS_PER_WIN,
+  POWER,
+  STEP_DELAY,
+  STEP_POWER,
 } from "../constants";
-import { Spawn, SpawnOnGrid, Player as IPlayer } from "@types";
-import { updatePlayerStats } from "@services/stats";
+
 class Player {
   id: string;
   skin: string;
@@ -49,7 +50,9 @@ class Player {
   }
 
   kill(playerId: string) {
-    if (this.id === playerId) return;
+    if (this.id === playerId) {
+      return;
+    }
     this.kills.push(playerId);
   }
 

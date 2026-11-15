@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import { model, models, Schema } from "mongoose";
 
 const StatsSchema = new Schema(
   {
@@ -10,7 +10,7 @@ const StatsSchema = new Schema(
     games: { type: Number, default: 0 },
     top3: { type: Number, default: 0 },
   },
-  { versionKey: false }
+  { versionKey: false },
 );
 
 const PlayStats = models.stats || model("stats", StatsSchema);
