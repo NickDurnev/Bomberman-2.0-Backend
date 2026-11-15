@@ -26,8 +26,8 @@ describe("play stats", () => {
   }
 
   it("updatePlayerStats creates a row, then adds to it", async () => {
-    const { default: PlayStats } = await import("@db/models/PlayStats");
-    const { updatePlayerStats } = await import("@services/stats");
+    const { default: PlayStats } = await import("@/db/models/PlayStats");
+    const { updatePlayerStats } = await import("@/services/stats");
     const userId = uniqueName("stats-user");
 
     await updatePlayerStats({
@@ -59,7 +59,7 @@ describe("play stats", () => {
   });
 
   it("GET /api/v1/stats applies sort, skip and limit", async () => {
-    const { default: PlayStats } = await import("@db/models/PlayStats");
+    const { default: PlayStats } = await import("@/db/models/PlayStats");
     const prefix = uniqueName("sorted");
     await PlayStats.create([
       {
@@ -105,7 +105,7 @@ describe("play stats", () => {
   });
 
   it("GET /api/v1/stats?name= filters by user name", async () => {
-    const { default: PlayStats } = await import("@db/models/PlayStats");
+    const { default: PlayStats } = await import("@/db/models/PlayStats");
     const prefix = uniqueName("named");
     await PlayStats.create([
       { userId: `${prefix}-1`, userName: `${prefix}-Alice` },
@@ -125,7 +125,7 @@ describe("play stats", () => {
   });
 
   it("GET /api/v1/stats?name= matches regex characters literally", async () => {
-    const { default: PlayStats } = await import("@db/models/PlayStats");
+    const { default: PlayStats } = await import("@/db/models/PlayStats");
     const prefix = uniqueName("literal");
     await PlayStats.create([
       { userId: `${prefix}-dot`, userName: `${prefix}-a.c` },
@@ -146,7 +146,7 @@ describe("play stats", () => {
   });
 
   it("GET /api/v1/stats?name= orders the matches by user name", async () => {
-    const { default: PlayStats } = await import("@db/models/PlayStats");
+    const { default: PlayStats } = await import("@/db/models/PlayStats");
     const prefix = uniqueName("ordered");
     await PlayStats.create([
       { userId: `${prefix}-c`, userName: `${prefix}-c` },

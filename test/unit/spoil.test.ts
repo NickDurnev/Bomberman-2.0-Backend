@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   BOMBS,
   DELAY,
@@ -6,11 +7,10 @@ import {
   POWER,
   SMALL_MAP_PORTAL_SPAWNS,
   SPEED,
-} from "@constants";
-import { Bomb } from "@entity/bomb";
-import { Game } from "@entity/game";
-import { Spoil } from "@entity/spoil";
-import { afterEach, describe, expect, it, vi } from "vitest";
+} from "@/constants";
+import { Bomb } from "@/entity/bomb";
+import { Game } from "@/entity/game";
+import { Spoil } from "@/entity/spoil";
 
 function newGame(isPortalsEnabled = false, isDelaySpoilEnabled = false) {
   return new Game({

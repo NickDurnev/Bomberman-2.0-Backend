@@ -1,6 +1,6 @@
-import PlayStats from "@db/models/PlayStats";
-import User from "@db/models/User";
-import { connection } from "../db";
+import { connection } from "@/db";
+import PlayStats from "@/db/models/PlayStats";
+import User from "@/db/models/User";
 
 type updatePlayerArgs = {
   userId: string;

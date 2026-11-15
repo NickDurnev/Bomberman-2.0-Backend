@@ -1,10 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import {
-  DESTRUCTIBLE_CELL,
-  EMPTY_CELL,
-  INITIAL_DELAY,
-} from "../../src/constants";
+import { DESTRUCTIBLE_CELL, EMPTY_CELL, INITIAL_DELAY } from "@/constants";
 import type { ClientSocket, TestPlayer } from "../helpers/players";
 import { startTwoPlayerGame, waitFor } from "../helpers/players";
 import { startTestServer, TestServer } from "../helpers/server";

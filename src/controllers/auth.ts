@@ -1,9 +1,8 @@
-import User from "@db/models/User";
-import cloudinary from "@services/cloudinary";
-import { CustomError } from "@types";
 import { Request, Response } from "express";
-
-import { connection } from "../db";
+import { connection } from "@/db";
+import User from "@/db/models/User";
+import cloudinary from "@/services/cloudinary";
+import { CustomError } from "@/types";
 
 export async function login(req: Request, res: Response) {
   try {

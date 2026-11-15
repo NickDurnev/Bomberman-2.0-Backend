@@ -3,8 +3,7 @@ import path from "path";
 import { defineConfig } from "vitest/config";
 
 // Map every tsconfig.json path alias to src/, never to dist/.
-// "@services/*": ["src/services/*"] → /^@services\/(.*)$/ → <root>/src/services/$1
-// "@types": ["src/types"] → /^@types$/ → <root>/src/types
+// "@/*": ["./src/*"] → /^@\/(.*)$/ → <root>/src/$1
 const tsconfig = JSON.parse(
   readFileSync(path.join(__dirname, "tsconfig.json"), "utf8"),
 ) as {
