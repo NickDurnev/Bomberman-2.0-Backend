@@ -8,7 +8,13 @@ import {
   vi,
 } from "vitest";
 
-import { INITIAL_DELAY, POWER, SPEED } from "../../src/constants";
+import {
+  DESTRUCTIBLE_CELL,
+  EMPTY_CELL,
+  INITIAL_DELAY,
+  POWER,
+  SPEED,
+} from "../../src/constants";
 import {
   emitAck,
   expectNoEvent,
@@ -18,15 +24,13 @@ import {
 import { TestServer, startTestServer } from "../helpers/server";
 
 type Spoil = { id: string; row: number; col: number; spoil_type: number };
-type BlastedCell = { row: number; col: number; spoil: Spoil | null };
+type Cell = { row: number; col: number };
+type BlastedCell = Cell & { destroyed: boolean; spoil: Spoil | null };
 type DetonateBomb = { bomb_id: string; blastedCells: BlastedCell[] };
 type SpoilPicked = { player_id: string; spoil_id: string; spoil_type: number };
 type CurrentGame = {
-  players: {
-    id: string;
-    power: number;
-    spawnOnGrid: { row: number; col: number };
-  }[];
+  players: { id: string; power: number }[];
+  shadow_map: number[][];
 };
 
 const FUSE_TIMEOUT_MS = INITIAL_DELAY + 1500;
@@ -46,14 +50,37 @@ describe("spoils", () => {
     await server?.stop();
   });
 
-  // Starts a game, then forces the spoil roll and type, bombs p1's spawn cell
-  // and returns the spoil that the blast leaves on that cell.
+  // An empty cell with a box on one side, found from the map the server sent.
+  function emptyCellBesideBox(game: CurrentGame): { bomb: Cell; box: Cell } {
+    const { shadow_map: map } = game;
+    const sides = [
+      { row: -1, col: 0 },
+      { row: 0, col: 1 },
+      { row: 1, col: 0 },
+      { row: 0, col: -1 },
+    ];
+    for (let row = 0; row < map.length; row++) {
+      for (let col = 0; col < map[row].length; col++) {
+        if (map[row][col] !== EMPTY_CELL) {
+          continue;
+        }
+        for (const side of sides) {
+          const box = { row: row + side.row, col: col + side.col };
+          if (map[box.row]?.[box.col] === DESTRUCTIBLE_CELL) {
+            return { bomb: { row, col }, box };
+          }
+        }
+      }
+    }
+    throw new Error("the map has no box beside an empty cell");
+  }
+
+  // Starts a game, then forces the spoil roll and type, bombs a cell next to a
+  // box and returns the spoil that the destroyed box leaves.
   // The mock starts after the game starts, so spawns stay random.
   async function dropSpoil(randomValue: number) {
     const { p1, p2, gameId, game } = await startTwoPlayerGame(server.url);
-    const { players } = game as CurrentGame;
-    const { row, col } = players.find(player => player.id === p1.id)
-      ?.spawnOnGrid ?? { row: -1, col: -1 };
+    const { bomb, box } = emptyCellBesideBox(game as CurrentGame);
 
     // 0.34 passes the 50 % roll and picks index 1 of [SPEED, POWER, BOMBS];
     // 0 passes the roll and picks index 0 (SPEED).
@@ -63,17 +90,22 @@ describe("spoils", () => {
       "detonate bomb",
       FUSE_TIMEOUT_MS,
     );
-    p1.socket.emit("create bomb", { playerId: p1.id, gameId, col, row });
+    p1.socket.emit("create bomb", {
+      playerId: p1.id,
+      gameId,
+      col: bomb.col,
+      row: bomb.row,
+    });
     const blast = await detonated;
     vi.restoreAllMocks();
 
-    const spoil = blast.blastedCells.find(
-      cell => cell.row === row && cell.col === col,
-    )?.spoil;
-    if (!spoil) {
-      throw new Error("the forced roll left no spoil on the bomb cell");
+    const boxCell = blast.blastedCells.find(
+      cell => cell.row === box.row && cell.col === box.col,
+    );
+    if (!boxCell?.destroyed || !boxCell.spoil) {
+      throw new Error("the forced roll left no spoil on the destroyed box");
     }
-    return { p1, p2, gameId, spoil };
+    return { p1, p2, gameId, spoil: boxCell.spoil };
   }
 
   async function powerOf(

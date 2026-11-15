@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   BOMBS,
   DELAY,
+  DESTRUCTIBLE_CELL,
   EMPTY_CELL,
   POWER,
   SMALL_MAP_PORTAL_SPAWNS,
@@ -34,10 +35,11 @@ describe("spoils", () => {
     vi.restoreAllMocks();
   });
 
-  it("a blasted cell gets a spoil when the roll is below SPOIL_CHANCE", () => {
+  it("a destroyed box gets a spoil when the roll is below SPOIL_CHANCE", () => {
     vi.spyOn(Math, "random").mockReturnValue(0);
     const game = newGame();
     openArea(game, 9, 15, 2);
+    game.shadow_map[9][16] = DESTRUCTIBLE_CELL;
     const blasted = new Bomb({
       game,
       row: 9,
@@ -46,12 +48,10 @@ describe("spoils", () => {
       delay: 2000,
     }).detonate();
 
-    expect(blasted).toHaveLength(5);
-    for (const cell of blasted) {
-      expect(cell.spoil).not.toBeNull();
-      expect(game.spoils.get(cell.spoil?.id ?? "")).toBe(cell.spoil);
-    }
-    expect(game.spoils.size).toBe(5);
+    const boxCell = blasted.find(cell => cell.row === 9 && cell.col === 16);
+    expect(boxCell?.destroyed).toBe(true);
+    expect(boxCell?.spoil).not.toBeNull();
+    expect(game.spoils.get(boxCell?.spoil?.id ?? "")).toBe(boxCell?.spoil);
   });
 
   it("no spoil when the roll is at or above SPOIL_CHANCE", () => {
@@ -121,7 +121,6 @@ describe("spoils", () => {
 
     const cell = blasted.find(c => c.row === row && c.col === col);
     expect(cell?.portal).toBeNull();
-    expect(cell?.spoil).not.toBeNull();
     expect(game.portals.size).toBe(0);
   });
 });
