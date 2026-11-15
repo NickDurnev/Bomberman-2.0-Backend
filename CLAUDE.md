@@ -16,7 +16,7 @@ Stack: Node.js, Express, socket.io, MongoDB (Mongoose), TypeScript, Biome.
 | `npm run lint:fix` / `npm run format:fix` | Biome lint / format with fixes on the whole repo |
 | `npm run format` | Biome format check |
 
-`_moduleAliases` in `package.json` point at `./dist`, so aliased imports (`@entity`, `@constants`, ...) load from `dist`. Run `npm run build` after any change in `src/`. In the workspace, `make backend` rebuilds `dist` and restarts on every `src/` change.
+Import from `src` with the `@/` alias (`@/entity/game`, `@/constants`), never with a relative path; Biome `noRestrictedImports` fails on a relative import in `src/`. `@/` maps to `src/` in `tsconfig.json` and to `./dist` in `_moduleAliases` (`package.json`), so at runtime aliased imports load from `dist`. Run `npm run build` after any change in `src/`. In the workspace, `make backend` rebuilds `dist` and restarts on every `src/` change.
 
 ## Checks before a commit
 
