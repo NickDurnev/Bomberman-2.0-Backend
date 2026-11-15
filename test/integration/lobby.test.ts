@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-
+import type { TestPlayer } from "../helpers/players";
 import {
   connectPlayer,
   createUser,
@@ -7,8 +7,7 @@ import {
   uniqueName,
   waitFor,
 } from "../helpers/players";
-import type { TestPlayer } from "../helpers/players";
-import { TestServer, startTestServer } from "../helpers/server";
+import { startTestServer, TestServer } from "../helpers/server";
 
 type GameSummary = {
   id: string;

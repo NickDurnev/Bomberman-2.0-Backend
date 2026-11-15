@@ -7,7 +7,6 @@
     "start": "node dist/app.js",
     "build": "tsc",
     "postbuild": "copyfiles -u 1 src/maps/* dist",
-    "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/app.ts",
     "lint:fix": "biome lint --write .",
     "lint-staged": "lint-staged",
     "format": "biome format .",
@@ -40,30 +39,35 @@
     "mongoose": "^8.5.1",
     "node-cron": "^3.0.3",
     "socket.io": "^4.8.1",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
+    "typescript": "^7.0.2",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@commitlint/types": "^19.8.1",
+    "@biomejs/biome": "^2.6.8",
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@commitlint/types": "^21.2.3",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.8.7",
+    "@types/node": "^22.20.5",
     "@types/node-cron": "^3.0.11",
     "@types/socket.io": "^3.0.2",
     "@types/uuid": "^10.0.0",
-    "concurrently": "^9.1.0",
+    "concurrently": "^10.0.7",
     "husky": "^9.1.7",
-    "lint-staged": "^16.0.0",
+    "lint-staged": "^17.6.0",
     "mongodb-memory-server": "^11.3.0",
     "nodemon": "^3.1.7",
     "socket.io-client": "^4.8.4",
-    "ts-node": "^10.9.2",
     "vitest": "^5.1.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["biome check --write --no-errors-on-unmatched"]
+    "*.{js,jsx,ts,tsx}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  },
+  "overrides": {
+    "nodemon": {
+      "minimatch": "^11.0.8"
+    }
   }
 }

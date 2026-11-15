@@ -1,6 +1,3 @@
-import { BroadcastOperator, DefaultEventsMap } from "socket.io";
-import { v4 as uuidv4 } from "uuid";
-
 import { Game } from "@entity/game";
 import {
   BombDetails,
@@ -10,6 +7,8 @@ import {
   SpoilDetails,
   UserDetails,
 } from "@types";
+import { BroadcastOperator, DefaultEventsMap } from "socket.io";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   DELETE_PENDING_GAMES_INTERVAL,

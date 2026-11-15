@@ -1,6 +1,6 @@
-import type { AddressInfo } from "net";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
+import type { AddressInfo } from "net";
 import type { Server } from "socket.io";
 
 import { disconnectAllPlayers } from "./players";

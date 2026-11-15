@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { connectPlayer, emitAck, uniqueName } from "../helpers/players";
-import { TestServer, startTestServer } from "../helpers/server";
+import { startTestServer, TestServer } from "../helpers/server";
 
 describe("test server", () => {
   let server: TestServer;

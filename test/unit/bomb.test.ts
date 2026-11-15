@@ -1,5 +1,3 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
 import {
   DESTRUCTIBLE_CELL,
   EMPTY_CELL,
@@ -7,6 +5,7 @@ import {
 } from "@constants";
 import { Bomb } from "@entity/bomb";
 import { Game } from "@entity/game";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const ROW = 9;
 const COL = 15;

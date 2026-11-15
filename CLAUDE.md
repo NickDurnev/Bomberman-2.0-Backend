@@ -8,7 +8,6 @@ Stack: Node.js, Express, socket.io, MongoDB (Mongoose), TypeScript, Biome.
 
 | Script | Action |
 | --- | --- |
-| `npm run dev` | nodemon with ts-node |
 | `npm run build` | `tsc`, then copy `src/maps` to `dist` |
 | `npm run start` | Run `dist/app.js` |
 | `npm run check` | `biome ci .`: lint and format check on the whole repo, no writes |
@@ -17,7 +16,7 @@ Stack: Node.js, Express, socket.io, MongoDB (Mongoose), TypeScript, Biome.
 | `npm run lint:fix` / `npm run format:fix` | Biome lint / format with fixes on the whole repo |
 | `npm run format` | Biome format check |
 
-`_moduleAliases` in `package.json` point at `./dist`, so aliased imports (`@entity`, `@constants`, ...) load from `dist`, even under `npm run dev`. Run `npm run build` after any change in `src/`. In the workspace, `make backend` rebuilds `dist` and restarts on every `src/` change.
+`_moduleAliases` in `package.json` point at `./dist`, so aliased imports (`@entity`, `@constants`, ...) load from `dist`. Run `npm run build` after any change in `src/`. In the workspace, `make backend` rebuilds `dist` and restarts on every `src/` change.
 
 ## Checks before a commit
 

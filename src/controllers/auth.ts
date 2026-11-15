@@ -1,8 +1,7 @@
-import { Request, Response } from "express";
-
 import User from "@db/models/User";
 import cloudinary from "@services/cloudinary";
 import { CustomError } from "@types";
+import { Request, Response } from "express";
 
 import { connection } from "../db";
 
