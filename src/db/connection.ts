@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
-// Load environment variables
-dotenv.config();
+// Load environment variables. dotenv 17+ logs an "injected env" line by
+// default; quiet keeps the startup log as it was.
+dotenv.config({ quiet: true });
 
 const contactsDB = process.env.DB_HOST ?? "";
 
