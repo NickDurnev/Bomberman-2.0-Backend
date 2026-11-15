@@ -136,9 +136,15 @@ export function emitAck<T>(
   event: string,
   ...args: unknown[]
 ): Promise<T> {
-  return socket
-    .timeout(DEFAULT_TIMEOUT_MS)
-    .emitWithAck(event, ...args) as Promise<T>;
+  return (
+    socket.timeout(DEFAULT_TIMEOUT_MS).emitWithAck(event, ...args) as Promise<T>
+  ).catch((error: unknown) => {
+    // socket.io rejects with a generic "operation has timed out" error.
+    if (error instanceof Error && /timed out/.test(error.message)) {
+      throw new Error(`timeout waiting for ack of "${event}"`);
+    }
+    throw error;
+  });
 }
 
 type GameOptions = {
