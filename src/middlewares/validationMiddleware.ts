@@ -42,7 +42,10 @@ const schemaValidator = (path: string, useJoiError = true): RequestHandler => {
       return;
     }
 
-    const { error, value } = schema.validate(req.body, validationOptions);
+    // Express 5 leaves req.body undefined when no parser matched (for example
+    // a request without a JSON Content-Type). Express 4 gave {}. Validate {} so
+    // such a request still gets 422 for the missing required fields.
+    const { error, value } = schema.validate(req.body ?? {}, validationOptions);
 
     if (error) {
       const customError: CustomError = {

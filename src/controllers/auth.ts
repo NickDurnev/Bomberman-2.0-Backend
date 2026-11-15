@@ -25,7 +25,7 @@ export async function login(req: Request, res: Response) {
       const updatedUser = await User.findOneAndUpdate(
         { email },
         { picture: pictureUrl },
-        { new: true },
+        { returnDocument: "after" },
       );
       res.json({
         status: "success",

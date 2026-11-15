@@ -57,7 +57,7 @@ export const updatePlayerStats = async ({
         },
         $setOnInsert: { userName: user?.name ?? "Unknown" },
       },
-      { upsert: true, new: true },
+      { upsert: true, returnDocument: "after" },
     );
   } catch (error: unknown) {
     if (error instanceof Error) {
