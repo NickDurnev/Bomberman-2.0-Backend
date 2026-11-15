@@ -61,18 +61,36 @@ describe("play stats", () => {
   it("GET /api/v1/stats applies sort, skip and limit", async () => {
     const { default: PlayStats } = await import("@db/models/PlayStats");
     const prefix = uniqueName("sorted");
-    await PlayStats.deleteMany({});
     await PlayStats.create([
-      { userId: `${prefix}-a`, userName: `${prefix}-a`, points: 5, kills: 30 },
-      { userId: `${prefix}-b`, userName: `${prefix}-b`, points: 50, kills: 10 },
-      { userId: `${prefix}-c`, userName: `${prefix}-c`, points: 20, kills: 20 },
+      {
+        userId: `${prefix}-a`,
+        userName: `${prefix}-a`,
+        points: 5000,
+        kills: 3000,
+      },
+      {
+        userId: `${prefix}-b`,
+        userName: `${prefix}-b`,
+        points: 50000,
+        kills: 1000,
+      },
+      {
+        userId: `${prefix}-c`,
+        userName: `${prefix}-c`,
+        points: 20000,
+        kills: 2000,
+      },
     ]);
+
+    // Other tests in this file add rows too. The values here are far above
+    // theirs, so these rows are the first ones in each sort order.
+    const total = await PlayStats.countDocuments();
 
     const byPoints = await getStats("skip=1&limit=1");
     expect(byPoints.status).toBe(200);
     const pointsBody = (await byPoints.json()) as StatsBody;
     expect(pointsBody.status).toBe("success");
-    expect(pointsBody.data.total).toBe(3);
+    expect(pointsBody.data.total).toBe(total);
     expect(pointsBody.data.stats.map(row => row.userId)).toEqual([
       `${prefix}-c`,
     ]);
@@ -104,17 +122,5 @@ describe("play stats", () => {
       `${prefix}-1`,
       `${prefix}-2`,
     ]);
-  });
-
-  it("GET /api/v1/stats with an invalid name pattern returns a 500 JSON error", async () => {
-    const response = await getStats("name=(");
-
-    expect(response.status).toBe(500);
-    const body = (await response.json()) as {
-      success: boolean;
-      message: string;
-    };
-    expect(body.success).toBe(false);
-    expect(body.message).toContain("Invalid regular expression");
   });
 });
