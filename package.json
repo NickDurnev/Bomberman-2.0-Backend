@@ -37,7 +37,7 @@
     "joi": "^17.13.3",
     "module-alias": "^2.2.3",
     "mongoose": "^9.12.1",
-    "node-cron": "^3.0.3",
+    "node-cron": "^4.6.0",
     "socket.io": "^4.8.1",
     "typescript": "^7.0.2",
     "uuid": "^10.0.0"
@@ -49,7 +49,6 @@
     "@commitlint/types": "^21.2.3",
     "@types/express": "^5.0.6",
     "@types/node": "^22.20.5",
-    "@types/node-cron": "^3.0.11",
     "@types/socket.io": "^3.0.2",
     "@types/uuid": "^10.0.0",
     "husky": "^9.1.7",
