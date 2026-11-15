@@ -149,10 +149,22 @@ describe("lobby and game start", () => {
     await createUser(server.url, { name: dbName, email });
     // The handshake carries an empty name, so Game.addPlayer reads the DB.
     const player = await connectPlayer(server.url, { name: "", email });
-    const creator = await newPlayer("creator");
-    const { game_id } = await createGame(creator);
+    // The server stores the socket id without awaiting it: poll the DB.
+    const { default: User } = await import("@db/models/User");
+    const deadline = Date.now() + 3000;
+    for (;;) {
+      const user = await User.findOne({ email });
+      if (user?.socketID === player.id) {
+        break;
+      }
+      if (Date.now() > deadline) {
+        throw new Error(`timeout waiting for the stored socket id of ${email}`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
 
-    // The handshake stored the socket id in the DB while the game was created.
+    const { game_id } = await createGame(player);
+
     const entered = waitFor<UpdateGame>(player.socket, "update game");
     player.socket.emit("enter pending game", game_id);
     const update = await entered;
