@@ -11,7 +11,6 @@ import {
   UserDetails,
 } from "@types";
 
-import { serverSocket } from "./app";
 import {
   DELETE_PENDING_GAMES_INTERVAL,
   GAME_DURATION,
@@ -21,6 +20,7 @@ import {
   TILE_SIZE,
 } from "./constants";
 import Player from "./entity/player";
+import { getIo } from "./io";
 import Lobby from "./lobby";
 import { getRandomItem } from "./utils";
 
@@ -114,7 +114,7 @@ class Play {
 
   onStartTimer(game_id: string) {
     this.socket_game_id = game_id;
-    serverSocket.sockets.in(game_id).emit("start timer");
+    getIo().sockets.in(game_id).emit("start timer");
   }
 
   onStartGame(game_id: string) {
@@ -140,7 +140,7 @@ class Play {
         isProcessStats: false,
       });
     }, GAME_DURATION * 1000);
-    serverSocket.sockets.in(game.id).emit("launch game", game);
+    getIo().sockets.in(game.id).emit("launch game", game);
   }
 
   onGetCurrentGame(game_id: string) {
@@ -181,7 +181,7 @@ class Play {
       winGameInfos.delete(game_id);
       endingGames.delete(game_id);
 
-      serverSocket.sockets.to(game_id).emit("end game", {
+      getIo().sockets.to(game_id).emit("end game", {
         game_id: game_id,
         new_game_id: newGame.id,
         prevGameInfo,
@@ -216,8 +216,8 @@ class Play {
           isProcessStats: false,
         });
       } else {
-        serverSocket.sockets
-          .in(this.socket_game_id)
+        getIo()
+          .sockets.in(this.socket_game_id)
           .emit("player disconnect", { player_id: playerId });
       }
     }
@@ -251,7 +251,7 @@ class Play {
       });
       this.bombQueue.set(gameId, queue);
 
-      serverSocket.sockets.to(gameId).emit("show bomb", {
+      getIo().sockets.to(gameId).emit("show bomb", {
         bomb_id: bomb.id,
         playerId,
         col: bomb.col,
@@ -271,7 +271,7 @@ class Play {
       const blastedCells = bomb.detonate();
       currentGame.deleteBomb(bomb_id);
 
-      serverSocket.sockets.to(gameId).emit("detonate bomb", {
+      getIo().sockets.to(gameId).emit("detonate bomb", {
         bomb_id: bomb.id,
         playerId,
         blastedCells,
@@ -318,7 +318,7 @@ class Play {
       currentGame.deleteSpoil(spoil.id);
       currentPlayer?.pickSpoil(spoil.spoil_type);
 
-      serverSocket.sockets.to(gameId).emit("spoil was picked", {
+      getIo().sockets.to(gameId).emit("spoil was picked", {
         player_id: currentPlayer?.id,
         spoil_id: spoil.id,
         spoil_type: spoil.spoil_type,
@@ -357,11 +357,13 @@ class Play {
 
     if (randomPortal) {
       //Update player position
-      serverSocket.sockets.to(gameId).emit("teleport player", {
-        player_id: currentPlayer?.id,
-        x: col * TILE_SIZE + TILE_SIZE / 2,
-        y: row * TILE_SIZE + TILE_SIZE / 2,
-      });
+      getIo()
+        .sockets.to(gameId)
+        .emit("teleport player", {
+          player_id: currentPlayer?.id,
+          x: col * TILE_SIZE + TILE_SIZE / 2,
+          y: row * TILE_SIZE + TILE_SIZE / 2,
+        });
     }
   }
 
@@ -375,8 +377,8 @@ class Play {
 
     currentGame.addTombStone({ tombId, row, col });
 
-    serverSocket.sockets
-      .to(gameId)
+    getIo()
+      .sockets.to(gameId)
       .emit("show tombstone", { player_id: playerId, tombId, col, row });
 
     const currentPlayer = currentGame.players.find(
@@ -416,8 +418,8 @@ class Play {
 
     if (alivePlayersCount < 2 && alivePlayer) {
       winGameInfos.set(gameId, prevGameInfo);
-      serverSocket.sockets
-        .to(gameId)
+      getIo()
+        .sockets.to(gameId)
         .emit("player win", { winner: alivePlayer, prevGameInfo });
       this.endGame({
         game_id: gameId,
@@ -450,6 +452,6 @@ setInterval(() => {
       Lobby.deletePendingGame(gameId);
     }
   });
-}, 60 * 1000);
+}, 60 * 1000).unref();
 
 export default Play;

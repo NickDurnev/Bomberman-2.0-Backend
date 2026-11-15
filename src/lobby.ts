@@ -1,7 +1,7 @@
 import { CustomSocket, NewGamePayload } from "@types";
-import { serverSocket } from "./app";
 import { LOBBY_TIMEOUT } from "./constants";
 import { Game } from "./entity/game";
+import { getIo } from "./io";
 
 // Lobby Room ID
 const lobbyId = "lobby_room";
@@ -112,16 +112,14 @@ const Lobby = {
   },
 
   updateLobbyGames() {
-    serverSocket.sockets
-      .in(lobbyId)
+    getIo()
+      .sockets.in(lobbyId)
       .emit("display pending games", Lobby.availablePendingGames());
   },
 
   updateCurrentGame(game: Game) {
     // Emit the updated game to all players in the game room
-    serverSocket.sockets
-      .in(game.id)
-      .emit("update game", { current_game: game });
+    getIo().sockets.in(game.id).emit("update game", { current_game: game });
   },
 };
 
@@ -135,6 +133,6 @@ setInterval(() => {
       }
     }
   });
-}, 60 * 1000);
+}, 60 * 1000).unref();
 
 export default Lobby;

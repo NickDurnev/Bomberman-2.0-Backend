@@ -13,6 +13,7 @@ Stack: Node.js, Express, socket.io, MongoDB (Mongoose), TypeScript, Biome.
 | `npm run start` | Run `dist/app.js` |
 | `npm run check` | `biome ci .`: lint and format check on the whole repo, no writes |
 | `npm run typecheck` | `tsc --noEmit` |
+| `npm test` / `npm run test:watch` | Vitest run once / in watch mode |
 | `npm run lint:fix` / `npm run format:fix` | Biome lint / format with fixes on the whole repo |
 | `npm run format` | Biome format check |
 
@@ -25,11 +26,12 @@ Never commit with a failing check. Each command must exit 0. `<changed files>` m
 1. Fix Biome in your files: `npx biome check --write <changed files>`.
 2. Lint and format: `npm run check`
 3. Types: `npm run typecheck`
-4. Build: `npm run build`
+4. Tests: `npm test`
+5. Build: `npm run build`
 
 CI runs the same `checks` job on every PR to `dev`. A red check blocks the merge.
 
-There is no test script.
+Tests: see `docs/testing.md` in the workspace.
 
 ## Workflow
 

@@ -13,7 +13,9 @@
     "format": "biome format .",
     "format:fix": "biome format --write .",
     "check": "biome ci .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepare": "husky"
   },
   "_moduleAliases": {
@@ -57,9 +59,12 @@
     "concurrently": "^9.1.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
+    "mongodb-memory-server": "^11.3.0",
     "nodemon": "^3.1.7",
     "prettier": "^3.5.3",
-    "ts-node": "^10.9.2"
+    "socket.io-client": "^4.8.4",
+    "ts-node": "^10.9.2",
+    "vitest": "^5.1.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": ["biome check --write --no-errors-on-unmatched"]
