@@ -5,9 +5,9 @@ import {
   EMPTY_CELL,
   INITIAL_DELAY,
 } from "../../src/constants";
-import { startTwoPlayerGame, waitFor } from "../helpers/players";
 import type { ClientSocket, TestPlayer } from "../helpers/players";
-import { TestServer, startTestServer } from "../helpers/server";
+import { startTwoPlayerGame, waitFor } from "../helpers/players";
+import { startTestServer, TestServer } from "../helpers/server";
 
 type Cell = { row: number; col: number };
 type CurrentGame = {

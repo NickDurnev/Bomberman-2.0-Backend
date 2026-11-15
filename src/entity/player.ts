@@ -12,6 +12,7 @@ import {
   STEP_DELAY,
   STEP_POWER,
 } from "../constants";
+
 class Player {
   id: string;
   skin: string;

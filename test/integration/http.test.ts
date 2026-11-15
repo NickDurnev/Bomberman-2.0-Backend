@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { uniqueName } from "../helpers/players";
-import { TestServer, startTestServer } from "../helpers/server";
+import { startTestServer, TestServer } from "../helpers/server";
 
 describe("http routes", () => {
   let server: TestServer;

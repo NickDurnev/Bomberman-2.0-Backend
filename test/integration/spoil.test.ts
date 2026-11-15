@@ -21,7 +21,7 @@ import {
   startTwoPlayerGame,
   waitFor,
 } from "../helpers/players";
-import { TestServer, startTestServer } from "../helpers/server";
+import { startTestServer, TestServer } from "../helpers/server";
 
 type Spoil = { id: string; row: number; col: number; spoil_type: number };
 type Cell = { row: number; col: number };

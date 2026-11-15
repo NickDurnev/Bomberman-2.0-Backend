@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { POINTS_PER_WIN } from "../../src/constants";
-import { expectNoEvent, startTwoPlayerGame, waitFor } from "../helpers/players";
 import type { TestPlayer } from "../helpers/players";
-import { TestServer, startTestServer } from "../helpers/server";
+import { expectNoEvent, startTwoPlayerGame, waitFor } from "../helpers/players";
+import { startTestServer, TestServer } from "../helpers/server";
 
 type ShowTombstone = { player_id: string; col: number; row: number };
 type PlayerWin = { winner: { id: string } };

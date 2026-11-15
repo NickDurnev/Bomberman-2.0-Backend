@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
-
 import {
   DESTRUCTIBLE_CELL,
   EMPTY_CELL,
@@ -12,6 +10,7 @@ import { Portal } from "@entity/portal";
 import { Spoil } from "@entity/spoil";
 import { getUserBySocketId } from "@services/socket";
 import { NewGamePayload, User } from "@types";
+import { v4 as uuidv4 } from "uuid";
 
 // Assuming the type structure of `layer_info` from the map JSON file
 interface LayerInfo {

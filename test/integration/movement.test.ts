@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { startTwoPlayerGame, waitFor } from "../helpers/players";
-import { TestServer, startTestServer } from "../helpers/server";
+import { startTestServer, TestServer } from "../helpers/server";
 
 type MovePlayer = { player_id: string; x: number; y: number };
 

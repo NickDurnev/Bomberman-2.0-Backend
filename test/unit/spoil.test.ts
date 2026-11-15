@@ -1,5 +1,3 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-
 import {
   BOMBS,
   DELAY,
@@ -12,6 +10,7 @@ import {
 import { Bomb } from "@entity/bomb";
 import { Game } from "@entity/game";
 import { Spoil } from "@entity/spoil";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 function newGame(isPortalsEnabled = false, isDelaySpoilEnabled = false) {
   return new Game({

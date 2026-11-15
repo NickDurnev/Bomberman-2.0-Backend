@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-
+import type { TestPlayer } from "../helpers/players";
 import {
   connectPlayer,
   createUser,
@@ -8,8 +8,7 @@ import {
   uniqueName,
   waitFor,
 } from "../helpers/players";
-import type { TestPlayer } from "../helpers/players";
-import { TestServer, startTestServer } from "../helpers/server";
+import { startTestServer, TestServer } from "../helpers/server";
 
 type CurrentGame = { players: { id: string }[] };
 type UpdateGame = { current_game: { players: { id: string }[] } };
