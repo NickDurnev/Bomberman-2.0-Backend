@@ -57,10 +57,11 @@ The Bomberman 2.0 Backend serves as the server-side component for the Bomberman 
    npm install
    ```
 
-3. Start the development server:
+3. Build and start the server:
 
    ```bash
-   npm run dev
+   npm run build
+   npm start
    ```
 
 4. The server will run on `http://localhost:3000` (or your specified port).

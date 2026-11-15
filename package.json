@@ -7,7 +7,6 @@
     "start": "node dist/app.js",
     "build": "tsc",
     "postbuild": "copyfiles -u 1 src/maps/* dist",
-    "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/app.ts",
     "lint:fix": "biome lint --write .",
     "lint-staged": "lint-staged",
     "format": "biome format .",
@@ -40,8 +39,7 @@
     "mongoose": "^8.5.1",
     "node-cron": "^3.0.3",
     "socket.io": "^4.8.1",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
+    "typescript": "^7.0.2",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
@@ -60,7 +58,6 @@
     "mongodb-memory-server": "^11.3.0",
     "nodemon": "^3.1.7",
     "socket.io-client": "^4.8.4",
-    "ts-node": "^10.9.2",
     "vitest": "^5.1.0"
   },
   "lint-staged": {
