@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { POINTS_PER_WIN } from "../../src/constants";
+import { POINTS_PER_WIN } from "@/constants";
 import type { TestPlayer } from "../helpers/players";
 import { expectNoEvent, startTwoPlayerGame, waitFor } from "../helpers/players";
 import { startTestServer, TestServer } from "../helpers/server";
@@ -78,7 +78,7 @@ describe("match end", () => {
     "end of match writes play stats",
     async () => {
       const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
-      const { default: PlayStats } = await import("@db/models/PlayStats");
+      const { default: PlayStats } = await import("@/db/models/PlayStats");
 
       const ended = waitFor(p1.socket, "end game", END_GAME_TIMEOUT_MS);
       killP2(p1, p2, gameId);

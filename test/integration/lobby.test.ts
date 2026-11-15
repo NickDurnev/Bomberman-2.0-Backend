@@ -149,7 +149,7 @@ describe("lobby and game start", () => {
     // The handshake carries an empty name, so Game.addPlayer reads the DB.
     const player = await connectPlayer(server.url, { name: "", email });
     // The server stores the socket id without awaiting it: poll the DB.
-    const { default: User } = await import("@db/models/User");
+    const { default: User } = await import("@/db/models/User");
     const deadline = Date.now() + 3000;
     for (;;) {
       const user = await User.findOne({ email });

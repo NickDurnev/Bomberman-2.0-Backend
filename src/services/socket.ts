@@ -1,5 +1,5 @@
-import User from "@db/models/User";
-import { connection } from "../db";
+import { connection } from "@/db";
+import User from "@/db/models/User";
 
 export const storeSocketID = async (email: string, socketID: string) => {
   connection();

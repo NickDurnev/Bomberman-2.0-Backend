@@ -1,16 +1,15 @@
-import { Game } from "@entity/game";
-import { storeSocketID } from "@services/socket";
-import { CustomSocket } from "@types";
 import cors from "cors";
 import express, { Express } from "express";
 import http from "http";
 import path from "path";
 import { Server } from "socket.io";
-
-import { setIo } from "./io";
-import Lobby from "./lobby";
-import Play from "./play";
-import router from "./routes/index";
+import { Game } from "@/entity/game";
+import { setIo } from "@/io";
+import Lobby from "@/lobby";
+import Play from "@/play";
+import router from "@/routes/index";
+import { storeSocketID } from "@/services/socket";
+import { CustomSocket } from "@/types";
 
 // Frontend origins allowed to call the API.
 const corsOptions = {

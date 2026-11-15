@@ -1,10 +1,9 @@
 require("module-alias/register");
 
-import { deleteAllStats } from "@services/stats";
 import cron from "node-cron";
-
-import { connection } from "./db";
-import { createServer } from "./server";
+import { connection } from "@/db";
+import { createServer } from "@/server";
+import { deleteAllStats } from "@/services/stats";
 
 const PORT = process.env.PORT ?? 4000;
 

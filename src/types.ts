@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import Play from "./play";
+import Play from "@/play";
 
 type PlayerId = string;
 type GameId = string;

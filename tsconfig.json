@@ -1,14 +1,7 @@
 {
   "compilerOptions": {
     "paths": {
-      "@services/*": ["./src/services/*"],
-      "@entity/*": ["./src/entity/*"],
-      "@routes/*": ["./src/routes/*"],
-      "@middlewares/*": ["./src/middlewares/*"],
-      "@db/*": ["./src/db/*"],
-      "@types": ["./src/types"],
-      "@constants": ["./src/constants"],
-      "@utils": ["./src/utils"]
+      "@/*": ["./src/*"]
     },
     "target": "es6",
     "module": "commonjs",

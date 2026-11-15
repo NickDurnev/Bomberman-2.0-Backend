@@ -18,13 +18,7 @@
     "prepare": "husky"
   },
   "_moduleAliases": {
-    "@services": "./dist/services",
-    "@entity": "./dist/entity",
-    "@routes": "./dist/routes",
-    "@middlewares": "./dist/middlewares",
-    "@db": "./dist/db",
-    "@types": "./dist/types",
-    "@constants": "./dist/constants"
+    "@": "./dist"
   },
   "author": "",
   "license": "ISC",

@@ -1,15 +1,5 @@
-import { Game } from "@entity/game";
-import {
-  BombDetails,
-  NewGamePayload,
-  PlayerPositionData,
-  PortalDetails,
-  SpoilDetails,
-  UserDetails,
-} from "@types";
 import { BroadcastOperator, DefaultEventsMap } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
-
 import {
   DELETE_PENDING_GAMES_INTERVAL,
   GAME_DURATION,
@@ -17,11 +7,20 @@ import {
   INITIAL_POWER,
   NO_KILL_PHRASES,
   TILE_SIZE,
-} from "./constants";
-import Player from "./entity/player";
-import { getIo } from "./io";
-import Lobby from "./lobby";
-import { getRandomItem } from "./utils";
+} from "@/constants";
+import { Game } from "@/entity/game";
+import Player from "@/entity/player";
+import { getIo } from "@/io";
+import Lobby from "@/lobby";
+import {
+  BombDetails,
+  NewGamePayload,
+  PlayerPositionData,
+  PortalDetails,
+  SpoilDetails,
+  UserDetails,
+} from "@/types";
+import { getRandomItem } from "@/utils";
 
 type EndGameArgs = {
   game_id: string;

@@ -1,7 +1,7 @@
-import schemaValidator from "@middlewares/validationMiddleware";
 import { Request, Response, Router } from "express";
-import { login } from "../controllers/auth";
-import { getStats } from "../controllers/stats";
+import { login } from "@/controllers/auth";
+import { getStats } from "@/controllers/stats";
+import schemaValidator from "@/middlewares/validationMiddleware";
 
 const router = Router();
 

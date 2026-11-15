@@ -1,3 +1,3 @@
-import connection from "./connection";
+import connection from "@/db/connection";
 
 export { connection };
