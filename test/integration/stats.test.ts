@@ -123,4 +123,44 @@ describe("play stats", () => {
       `${prefix}-2`,
     ]);
   });
+
+  it("GET /api/v1/stats?name= matches regex characters literally", async () => {
+    const { default: PlayStats } = await import("@db/models/PlayStats");
+    const prefix = uniqueName("literal");
+    await PlayStats.create([
+      { userId: `${prefix}-dot`, userName: `${prefix}-a.c` },
+      { userId: `${prefix}-abc`, userName: `${prefix}-abc` },
+    ]);
+
+    const dot = await getStats(`name=${encodeURIComponent(`${prefix}-a.c`)}`);
+    expect(dot.status).toBe(200);
+    const dotBody = (await dot.json()) as StatsBody;
+    expect(dotBody.data.stats.map(row => row.userId)).toEqual([
+      `${prefix}-dot`,
+    ]);
+
+    const paren = await getStats(`name=${encodeURIComponent("(")}`);
+    expect(paren.status).toBe(200);
+    const parenBody = (await paren.json()) as StatsBody;
+    expect(parenBody.data).toEqual({ stats: [], total: 0 });
+  });
+
+  it("GET /api/v1/stats?name= orders the matches by user name", async () => {
+    const { default: PlayStats } = await import("@db/models/PlayStats");
+    const prefix = uniqueName("ordered");
+    await PlayStats.create([
+      { userId: `${prefix}-c`, userName: `${prefix}-c` },
+      { userId: `${prefix}-a`, userName: `${prefix}-a` },
+      { userId: `${prefix}-b`, userName: `${prefix}-b` },
+    ]);
+
+    const response = await getStats(`name=${prefix}&limit=10`);
+
+    const body = (await response.json()) as StatsBody;
+    expect(body.data.stats.map(row => row.userId)).toEqual([
+      `${prefix}-a`,
+      `${prefix}-b`,
+      `${prefix}-c`,
+    ]);
+  });
 });
