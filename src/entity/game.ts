@@ -124,6 +124,15 @@ export class Game {
     }
   }
 
+  // Called when a death leaves exactly 3 players alive.
+  markTop3() {
+    for (const player of this.players) {
+      if (player.isAlive) {
+        player.top3();
+      }
+    }
+  }
+
   isEmpty(): boolean {
     return this.players.length === 0;
   }

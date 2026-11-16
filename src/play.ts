@@ -435,9 +435,7 @@ class Play {
     }
 
     if (alivePlayersCount === 3) {
-      currentGame.players.forEach(player => {
-        player.top3();
-      });
+      currentGame.markTop3();
     }
 
     const currentGameData = {
