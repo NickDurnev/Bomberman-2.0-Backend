@@ -102,14 +102,32 @@ class Play {
     this.bombQueue.clear();
   }
 
-  onLeaveGame() {
-    if (this.socket_game_id) {
-      // Clear bomb queue for this game
-      this.bombQueue.delete(this.socket_game_id);
-      runningGames.delete(this.socket_game_id);
-      this.leave(this.socket_game_id);
-      this.socket_game_id = null;
+  // A leave during a running match removes only that player, exactly like a
+  // disconnect. Otherwise (the match already ended, or the game is pending)
+  // only this socket's game state is cleared.
+  onLeaveGame(playerId: string) {
+    const gameId = this.socket_game_id;
+    if (!gameId) {
+      return;
     }
+    const currentGame = runningGames.get(gameId);
+    const isRunning =
+      currentGame !== undefined &&
+      !endingGames.has(gameId) &&
+      currentGame.players.some(player => player.id === playerId);
+
+    if (isRunning) {
+      this.bombQueue.delete(gameId);
+      this.leave(gameId);
+      this.onDisconnectFromGame(playerId);
+      this.socket_game_id = null;
+      return;
+    }
+
+    // Clear bomb queue for this game
+    this.bombQueue.delete(gameId);
+    this.leave(gameId);
+    this.socket_game_id = null;
   }
 
   onStartTimer(game_id: string) {

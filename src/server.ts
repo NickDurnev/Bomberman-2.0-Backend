@@ -133,7 +133,9 @@ export function createServer(): {
       playerPlayInstance.onUsePortal(portalDetails),
     );
     client.on("player died", data => playerPlayInstance.onPlayerDied(data));
-    client.on("leave game", () => playerPlayInstance.onLeaveGame());
+    client.on("leave game", () =>
+      playerPlayInstance.onLeaveGame(client.customId || ""),
+    );
 
     client.on("player disconnect", data =>
       playerPlayInstance.onDisconnectFromGame(data.player_id),
