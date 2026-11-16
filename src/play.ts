@@ -142,6 +142,7 @@ class Play {
     if (!game) {
       return;
     }
+    game.start();
     runningGames.set(game.id, game);
 
     // Time limit. endGame skips the game if it already ended.
@@ -473,10 +474,10 @@ class Play {
 }
 
 // Removes running games that are empty after the match length, or older than
-// DELETE_PENDING_GAMES_INTERVAL.
+// DELETE_PENDING_GAMES_INTERVAL, counted from "start game".
 export function cleanupRunningGames(games: Map<string, Game>, now: number) {
   for (const [gameId, game] of games) {
-    const age = now - game.createdAt;
+    const age = now - game.startedAt;
     if (
       (age >= GAME_DURATION * 1000 && game.isEmpty()) ||
       age >= DELETE_PENDING_GAMES_INTERVAL * 1000

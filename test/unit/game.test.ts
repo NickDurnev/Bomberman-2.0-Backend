@@ -46,8 +46,9 @@ describe("Game.markTop3", () => {
 describe("cleanupRunningGames", () => {
   it("removes an empty game older than the match length", () => {
     const game = newGame();
+    game.start();
     const games = new Map([[game.id, game]]);
-    cleanupRunningGames(games, game.createdAt + GAME_DURATION * 1000);
+    cleanupRunningGames(games, game.startedAt + GAME_DURATION * 1000);
 
     expect(games.has(game.id)).toBe(false);
   });
@@ -55,14 +56,27 @@ describe("cleanupRunningGames", () => {
   it("keeps a game with players until the stale interval", () => {
     const game = newGame();
     addPlayers(game, 2);
+    game.start();
     const games = new Map([[game.id, game]]);
-    cleanupRunningGames(games, game.createdAt + GAME_DURATION * 1000);
+    cleanupRunningGames(games, game.startedAt + GAME_DURATION * 1000);
     expect(games.has(game.id)).toBe(true);
 
     cleanupRunningGames(
       games,
-      game.createdAt + DELETE_PENDING_GAMES_INTERVAL * 1000,
+      game.startedAt + DELETE_PENDING_GAMES_INTERVAL * 1000,
     );
     expect(games.has(game.id)).toBe(false);
+  });
+
+  it("measures the age from the start, not from the pending game", () => {
+    const game = newGame();
+    addPlayers(game, 2);
+    // The room waited in the lobby for longer than the stale interval.
+    game.createdAt -= DELETE_PENDING_GAMES_INTERVAL * 1000;
+    game.start();
+    const games = new Map([[game.id, game]]);
+    cleanupRunningGames(games, game.startedAt + 60 * 1000);
+
+    expect(games.has(game.id)).toBe(true);
   });
 });
