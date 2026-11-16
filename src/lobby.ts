@@ -1,7 +1,7 @@
-import { CustomSocket, NewGamePayload } from "@types";
-import { LOBBY_TIMEOUT } from "./constants";
-import { Game } from "./entity/game";
-import { getIo } from "./io";
+import { LOBBY_TIMEOUT } from "@/constants";
+import { Game } from "@/entity/game";
+import { getIo } from "@/io";
+import { CustomSocket, NewGamePayload } from "@/types";
 
 // Lobby Room ID
 const lobbyId = "lobby_room";

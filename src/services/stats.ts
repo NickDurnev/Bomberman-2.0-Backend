@@ -1,6 +1,6 @@
-import PlayStats from "@db/models/PlayStats";
-import User from "@db/models/User";
-import { connection } from "../db";
+import { connection } from "@/db";
+import PlayStats from "@/db/models/PlayStats";
+import User from "@/db/models/User";
 
 type updatePlayerArgs = {
   userId: string;
@@ -82,16 +82,17 @@ export const get = async ({ skip, limit, sort }: getPlayersArgs) => {
   }
 };
 
+// The name is user input: escape it so it matches as plain text.
+const escapeRegExp = (text: string) =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export const getByName = async ({ name, skip, limit }: getByNameArgs) => {
-  const stats = await PlayStats.find({
-    userName: new RegExp(name, "i"),
-  })
+  const filter = { userName: new RegExp(escapeRegExp(name), "i") };
+  const stats = await PlayStats.find(filter)
     .select({ __v: 0 })
     .skip(skip)
     .limit(limit)
-    .sort({ name: 1 });
-  const total = await PlayStats.countDocuments({
-    userName: new RegExp(name, "i"),
-  });
+    .sort({ userName: 1 });
+  const total = await PlayStats.countDocuments(filter);
   return { stats, total };
 };

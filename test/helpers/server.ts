@@ -19,8 +19,8 @@ export async function startTestServer(): Promise<TestServer> {
   // when it is first imported.
   process.env.DB_HOST = mongod.getUri("bomberman-test");
 
-  const { connection } = await import("../../src/db");
-  const { createServer } = await import("../../src/server");
+  const { connection } = await import("@/db");
+  const { createServer } = await import("@/server");
 
   await connection();
   const { httpServer, io } = createServer();

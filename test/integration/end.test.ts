@@ -1,13 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { POINTS_PER_WIN } from "../../src/constants";
+import { POINTS_PER_WIN } from "@/constants";
 import type { TestPlayer } from "../helpers/players";
 import { expectNoEvent, startTwoPlayerGame, waitFor } from "../helpers/players";
 import { startTestServer, TestServer } from "../helpers/server";
 
 type ShowTombstone = { player_id: string; col: number; row: number };
 type PlayerWin = { winner: { id: string } };
-type EndGame = { game_id: string; new_game_id: string };
+type EndGame = { game_id: string; new_game_id: string; reason: string };
 
 // The server sends "end game" 5 s after a win.
 const END_GAME_TIMEOUT_MS = 8000;
@@ -68,6 +68,7 @@ describe("match end", () => {
       const end = await ended;
       expect(end.game_id).toBe(gameId);
       expect(typeof end.new_game_id).toBe("string");
+      expect(end.reason).toBe("win");
 
       await expectNoEvent(p1.socket, "end game", 2000);
     },
@@ -78,7 +79,7 @@ describe("match end", () => {
     "end of match writes play stats",
     async () => {
       const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
-      const { default: PlayStats } = await import("@db/models/PlayStats");
+      const { default: PlayStats } = await import("@/db/models/PlayStats");
 
       const ended = waitFor(p1.socket, "end game", END_GAME_TIMEOUT_MS);
       killP2(p1, p2, gameId);

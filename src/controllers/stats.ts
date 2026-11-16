@@ -1,6 +1,6 @@
-import { get, getByName } from "@services/stats";
-import { CustomError } from "@types";
 import { Request, Response } from "express";
+import { get, getByName } from "@/services/stats";
+import { CustomError } from "@/types";
 
 export const getStats = async (req: Request, res: Response) => {
   const skip = Number(req.query.skip) || 0;

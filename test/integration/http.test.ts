@@ -30,7 +30,7 @@ describe("http routes", () => {
 
     expect(response.status).toBeGreaterThanOrEqual(200);
     expect(response.status).toBeLessThan(300);
-    const { default: User } = await import("@db/models/User");
+    const { default: User } = await import("@/db/models/User");
     const user = await User.findOne({ email });
     expect(user).not.toBeNull();
     expect(user?.name).toBe(name);

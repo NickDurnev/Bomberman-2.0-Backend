@@ -1,5 +1,3 @@
-import { updatePlayerStats } from "@services/stats";
-import { Player as IPlayer, Spawn, SpawnOnGrid } from "@types";
 import {
   DELAY,
   INITIAL_DELAY,
@@ -11,7 +9,9 @@ import {
   POWER,
   STEP_DELAY,
   STEP_POWER,
-} from "../constants";
+} from "@/constants";
+import { updatePlayerStats } from "@/services/stats";
+import { Player as IPlayer, Spawn, SpawnOnGrid } from "@/types";
 
 class Player {
   id: string;

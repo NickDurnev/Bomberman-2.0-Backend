@@ -14,7 +14,7 @@ import {
   INITIAL_DELAY,
   POWER,
   SPEED,
-} from "../../src/constants";
+} from "@/constants";
 import {
   emitAck,
   expectNoEvent,

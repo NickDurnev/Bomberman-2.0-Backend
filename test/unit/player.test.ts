@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import {
   BOMBS,
   DELAY,
@@ -8,9 +9,8 @@ import {
   SPEED,
   STEP_DELAY,
   STEP_POWER,
-} from "@constants";
-import Player from "@entity/player";
-import { describe, expect, it } from "vitest";
+} from "@/constants";
+import Player from "@/entity/player";
 
 function newPlayer() {
   return new Player({

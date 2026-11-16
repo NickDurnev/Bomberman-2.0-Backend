@@ -1,10 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import {
-  DESTRUCTIBLE_CELL,
-  EMPTY_CELL,
-  INITIAL_DELAY,
-} from "../../src/constants";
+import { DESTRUCTIBLE_CELL, EMPTY_CELL, INITIAL_DELAY } from "@/constants";
 import type { ClientSocket, TestPlayer } from "../helpers/players";
 import { startTwoPlayerGame, waitFor } from "../helpers/players";
 import { startTestServer, TestServer } from "../helpers/server";
@@ -14,7 +10,13 @@ type CurrentGame = {
   players: { id: string; spawnOnGrid: Cell }[];
   shadow_map: number[][];
 };
-type ShowBomb = { bomb_id: string; playerId: string; col: number; row: number };
+type ShowBomb = {
+  bomb_id: string;
+  playerId: string;
+  col: number;
+  row: number;
+  delay: number;
+};
 type BlastedCell = {
   row: number;
   col: number;
@@ -100,8 +102,24 @@ describe("bombs", () => {
       playerId: p1.id,
       col: cell.col,
       row: cell.row,
+      delay: own.delay,
     });
     expect(other).toEqual(own);
+  });
+
+  it("show bomb carries the bomb's fuse delay", async () => {
+    const { p1, p2, gameId, game } = await startTwoPlayerGame(server.url);
+    const cell = spawnOf(game as CurrentGame, p1);
+
+    const shown = Promise.all([
+      waitFor<ShowBomb>(p1.socket, "show bomb"),
+      waitFor<ShowBomb>(p2.socket, "show bomb"),
+    ]);
+    placeBomb(p1.socket, p1, gameId, cell);
+    const [own, other] = await shown;
+
+    expect(own.delay).toBe(2000);
+    expect(other.delay).toBe(2000);
   });
 
   it("the server detonates the bomb after the player's delay", async () => {
