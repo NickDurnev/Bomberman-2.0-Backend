@@ -215,6 +215,15 @@ export class Game {
     return this.portals;
   }
 
+  findPortalAt(row: number, col: number) {
+    for (const portal of this.portals.values()) {
+      if (portal.row === row && portal.col === col) {
+        return portal;
+      }
+    }
+    return undefined;
+  }
+
   addSpoil(spoil: Spoil) {
     this.spoils.set(spoil.id, spoil);
   }
@@ -237,6 +246,14 @@ export class Game {
 
   deleteSpoil(spoil_id: string) {
     this.spoils.delete(spoil_id);
+  }
+
+  deleteSpoilAt(row: number, col: number) {
+    for (const [id, spoil] of this.spoils) {
+      if (spoil.row === row && spoil.col === col) {
+        this.spoils.delete(id);
+      }
+    }
   }
 
   deleteBomb(bomb_id: string) {

@@ -107,11 +107,17 @@ export class Bomb {
     let spoil: Spoil | null = null;
     let portal: Portal | null = null;
 
+    // Mirrors the client: a spoil drops only on a destroyed box, a portal
+    // cell opens one portal, and a blast anywhere else burns the spoil there.
     if (isPortal) {
-      portal = new Portal(row, col);
-      this.game.addPortal(portal);
-    } else {
+      if (!this.game.findPortalAt(row, col)) {
+        portal = new Portal(row, col);
+        this.game.addPortal(portal);
+      }
+    } else if (destroyed) {
       spoil = this.craftSpoil(row, col);
+    } else {
+      this.game.deleteSpoilAt(row, col);
     }
 
     this.blastedCells.push({

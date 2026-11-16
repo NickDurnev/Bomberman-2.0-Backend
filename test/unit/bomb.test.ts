@@ -3,9 +3,11 @@ import {
   DESTRUCTIBLE_CELL,
   EMPTY_CELL,
   NON_DESTRUCTIBLE_CELL,
+  SMALL_MAP_PORTAL_SPAWNS,
 } from "@/constants";
 import { Bomb } from "@/entity/bomb";
 import { Game } from "@/entity/game";
+import { Spoil } from "@/entity/spoil";
 
 const ROW = 9;
 const COL = 15;
@@ -138,5 +140,68 @@ describe("Bomb.detonate", () => {
     game.shadow_map[ROW][COL] = DESTRUCTIBLE_CELL;
     new Bomb({ game, row: ROW, col: COL, power: 1, delay: 2000 }).detonate();
     expect(game.getMapCell(ROW, COL)).toBe(EMPTY_CELL);
+  });
+});
+
+describe("Bomb.detonate spoils and portals", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("a spoil drops only on a destroyed box", () => {
+    // Every roll is under SPOIL_CHANCE: a spoil drops wherever one can.
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const game = newGame();
+    openArea(game, ROW, COL, 3);
+    game.shadow_map[ROW][COL + 2] = DESTRUCTIBLE_CELL;
+    const blasted = new Bomb({
+      game,
+      row: ROW,
+      col: COL,
+      power: 2,
+      delay: 2000,
+    }).detonate();
+
+    const withSpoil = blasted.filter(cell => cell.spoil !== null);
+    expect(withSpoil).toHaveLength(1);
+    expect(withSpoil[0]).toMatchObject({ row: ROW, col: COL + 2 });
+    expect([...game.spoils.values()]).toEqual([withSpoil[0].spoil]);
+  });
+
+  it("a blast burns a spoil lying in its path", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+    const game = newGame();
+    openArea(game, ROW, COL, 3);
+    const spoil = new Spoil(ROW + 1, COL, false);
+    game.addSpoil(spoil);
+    new Bomb({ game, row: ROW, col: COL, power: 2, delay: 2000 }).detonate();
+
+    expect(game.findSpoil(spoil.id)).toBeUndefined();
+  });
+
+  it("a second blast on a portal cell adds no second portal", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
+    const game = new Game({
+      mapName: "small_map",
+      gameName: "bomb-unit",
+      isPortalsEnabled: true,
+      isDelaySpoilEnabled: false,
+    });
+    const spawn = SMALL_MAP_PORTAL_SPAWNS[0];
+    openArea(game, spawn.row + 2, spawn.col, 1);
+    const blast = () =>
+      new Bomb({
+        game,
+        row: spawn.row + 2,
+        col: spawn.col,
+        power: 2,
+        delay: 2000,
+      })
+        .detonate()
+        .find(cell => cell.row === spawn.row && cell.col === spawn.col);
+
+    expect(blast()?.portal).not.toBeNull();
+    expect(blast()?.portal).toBeNull();
+    expect(game.getPortals().size).toBe(1);
   });
 });
