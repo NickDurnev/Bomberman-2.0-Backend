@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
+import { INITIAL_DELAY } from "@/constants";
 import type { EndReason } from "@/types";
 import type { TestPlayer } from "../helpers/players";
 import {
@@ -12,7 +13,9 @@ import {
 } from "../helpers/players";
 import { startTestServer, TestServer } from "../helpers/server";
 
-type CurrentGame = { players: { id: string }[] };
+type CurrentGame = {
+  players: { id: string; spawnOnGrid: { row: number; col: number } }[];
+};
 type UpdateGame = { current_game: { players: { id: string }[] } };
 type PlayerDisconnect = { player_id: string };
 type EndGame = { game_id: string; reason: EndReason };
@@ -112,6 +115,33 @@ describe("disconnect and re-join", () => {
     );
   });
 
+  it("a bomb of a disconnected player still explodes by fuse", async () => {
+    const { p1, p2, gameId } = await startThreePlayerGame();
+    const game = await emitAck<CurrentGame>(
+      p2.socket,
+      "get current game",
+      gameId,
+    );
+    const spawn = game.players.find(player => player.id === p2.id)?.spawnOnGrid;
+    if (!spawn) {
+      throw new Error("p2 has no spawn");
+    }
+
+    const shown = waitFor(p1.socket, "show bomb");
+    p2.socket.emit("create bomb", { playerId: p2.id, gameId, ...spawn });
+    await shown;
+    const told = waitFor<PlayerDisconnect>(p1.socket, "player disconnect");
+    p2.socket.disconnect();
+    await told;
+
+    const detonated = await waitFor<{ playerId: string }>(
+      p1.socket,
+      "detonate bomb",
+      INITIAL_DELAY + 1500,
+    );
+    expect(detonated.playerId).toBe(p2.id);
+  });
+
   it("a disconnect that leaves one player ends the match", async () => {
     const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
 
@@ -197,26 +227,17 @@ describe("disconnect and re-join", () => {
     expect(payload.reason).toBe("disconnect");
   });
 
-  it("a disconnect clears the Play bomb-queue interval", async () => {
-    const { p1, p2, p3 } = await startThreePlayerGame();
-    // The Play instance of p2's server-side socket keeps the interval handle.
-    const serverSocket = server.io.sockets.sockets.get(p2.socket.id ?? "") as
-      | { playInstance?: { bombQueueInterval: unknown } }
-      | undefined;
-    const interval = serverSocket?.playInstance?.bombQueueInterval;
-    expect(interval).toBeTruthy();
-
-    const spy = vi.spyOn(global, "clearInterval");
+  // The bomb queue is per game: a connection starts no timer, so nothing
+  // leaks when it closes.
+  it("a connection starts no interval", async () => {
+    const spy = vi.spyOn(global, "setInterval");
     try {
-      const told = waitFor(p1.socket, "player disconnect");
-      p2.socket.disconnect();
-      await told;
-
-      expect(spy).toHaveBeenCalledWith(interval);
+      const player = await newPlayer("p1");
+      expect(spy).not.toHaveBeenCalled();
+      player.socket.disconnect();
     } finally {
       spy.mockRestore();
     }
-    expect(p3.socket.connected).toBe(true);
   });
 
   it("the same socketId reconnecting is the same player", async () => {
