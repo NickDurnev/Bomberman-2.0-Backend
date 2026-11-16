@@ -112,10 +112,15 @@ describe("disconnect and re-join", () => {
   it("a disconnect that leaves one player ends the match", async () => {
     const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
 
-    const ended = waitFor<{ game_id: string }>(p1.socket, "end game");
+    const ended = waitFor<{ game_id: string; reason: string }>(
+      p1.socket,
+      "end game",
+    );
     p2.socket.disconnect();
 
-    expect((await ended).game_id).toBe(gameId);
+    const payload = await ended;
+    expect(payload.game_id).toBe(gameId);
+    expect(payload.reason).toBe("disconnect");
   });
 
   it("a disconnect clears the Play bomb-queue interval", async () => {

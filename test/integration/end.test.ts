@@ -7,7 +7,7 @@ import { startTestServer, TestServer } from "../helpers/server";
 
 type ShowTombstone = { player_id: string; col: number; row: number };
 type PlayerWin = { winner: { id: string } };
-type EndGame = { game_id: string; new_game_id: string };
+type EndGame = { game_id: string; new_game_id: string; reason: string };
 
 // The server sends "end game" 5 s after a win.
 const END_GAME_TIMEOUT_MS = 8000;
@@ -68,6 +68,7 @@ describe("match end", () => {
       const end = await ended;
       expect(end.game_id).toBe(gameId);
       expect(typeof end.new_game_id).toBe("string");
+      expect(end.reason).toBe("win");
 
       await expectNoEvent(p1.socket, "end game", 2000);
     },

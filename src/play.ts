@@ -14,6 +14,7 @@ import { getIo } from "@/io";
 import Lobby from "@/lobby";
 import {
   BombDetails,
+  EndReason,
   NewGamePayload,
   PlayerPositionData,
   PortalDetails,
@@ -26,6 +27,7 @@ type EndGameArgs = {
   game_id: string;
   gameData: NewGamePayload;
   delay: number;
+  reason: EndReason;
   winnerId?: string | null;
   isProcessStats?: boolean;
 };
@@ -135,6 +137,7 @@ class Play {
           isDelaySpoilEnabled: game.isDelaySpoilEnabled,
         },
         delay: 0,
+        reason: "timeout",
         isProcessStats: false,
       });
     }, GAME_DURATION * 1000);
@@ -151,6 +154,7 @@ class Play {
     winnerId = null,
     isProcessStats = true,
     delay,
+    reason,
   }: EndGameArgs) {
     const currentGame = runningGames.get(game_id);
     if (!currentGame || endingGames.has(game_id)) {
@@ -183,6 +187,7 @@ class Play {
         game_id: game_id,
         new_game_id: newGame.id,
         prevGameInfo,
+        reason,
       });
     }, delay * 1000);
   }
@@ -211,6 +216,7 @@ class Play {
             isDelaySpoilEnabled: currentGame.isDelaySpoilEnabled,
           },
           delay: 0,
+          reason: "disconnect",
           isProcessStats: false,
         });
       } else {
@@ -254,6 +260,7 @@ class Play {
         playerId,
         col: bomb.col,
         row: bomb.row,
+        delay: bomb.delay,
       });
     }
   }
@@ -424,6 +431,7 @@ class Play {
         gameData: currentGameData,
         winnerId: alivePlayer.id,
         delay: 5,
+        reason: "win",
       });
     }
 
@@ -432,6 +440,7 @@ class Play {
         game_id: gameId,
         gameData: currentGameData,
         delay: 2,
+        reason: "draw",
       });
     }
   }
