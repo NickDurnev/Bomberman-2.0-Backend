@@ -224,7 +224,17 @@ class Play {
 
       currentGame?.removePlayer(playerId);
 
-      if (currentGame?.players.length === 1) {
+      // Dead players stay in the game, so count only the living ones. One
+      // living player wins by forfeit; none left is a draw.
+      const livingCount =
+        currentGame?.players.filter(player => player.isAlive).length ?? 0;
+
+      // A match that is already ending keeps its own reason.
+      if (
+        currentGame &&
+        livingCount <= 1 &&
+        !endingGames.has(this.socket_game_id)
+      ) {
         this.endGame({
           game_id: this.socket_game_id,
           gameData: {
@@ -234,7 +244,7 @@ class Play {
             isDelaySpoilEnabled: currentGame.isDelaySpoilEnabled,
           },
           delay: 0,
-          reason: "disconnect",
+          reason: livingCount === 1 ? "disconnect" : "draw",
           isProcessStats: false,
         });
       } else {
