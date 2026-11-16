@@ -9,6 +9,8 @@ type GameAndPlayer = {
   playerId: PlayerId;
 };
 
+export type EndReason = "win" | "draw" | "timeout" | "disconnect";
+
 export type Coordinates = { x: number; y: number };
 
 export interface UserDetails extends GameAndPlayer {

@@ -112,10 +112,100 @@ describe("disconnect and re-join", () => {
   it("a disconnect that leaves one player ends the match", async () => {
     const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
 
-    const ended = waitFor<{ game_id: string }>(p1.socket, "end game");
+    const ended = waitFor<{ game_id: string; reason: string }>(
+      p1.socket,
+      "end game",
+    );
     p2.socket.disconnect();
 
-    expect((await ended).game_id).toBe(gameId);
+    const payload = await ended;
+    expect(payload.game_id).toBe(gameId);
+    expect(payload.reason).toBe("disconnect");
+  });
+
+  it("leave game from a running 3-player match keeps the match running for the others", async () => {
+    const { p1, p2, p3, gameId } = await startThreePlayerGame();
+
+    const told = waitFor<PlayerDisconnect>(p1.socket, "player disconnect");
+    p3.socket.emit("leave game");
+    expect((await told).player_id).toBe(p3.id);
+
+    const shown = waitFor<{ playerId: string }>(p2.socket, "show bomb");
+    p1.socket.emit("create bomb", {
+      playerId: p1.id,
+      gameId,
+      col: 1,
+      row: 1,
+    });
+    expect((await shown).playerId).toBe(p1.id);
+
+    const game = await emitAck<CurrentGame>(
+      p1.socket,
+      "get current game",
+      gameId,
+    );
+    expect(game.players.map(player => player.id).sort()).toEqual(
+      [p1.id, p2.id].sort(),
+    );
+  });
+
+  it("leave game that leaves one player ends the match with reason disconnect", async () => {
+    const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
+
+    const ended = waitFor<{ game_id: string; reason: string }>(
+      p1.socket,
+      "end game",
+    );
+    p2.socket.emit("leave game");
+
+    const payload = await ended;
+    expect(payload.game_id).toBe(gameId);
+    expect(payload.reason).toBe("disconnect");
+  });
+
+  // p2 dies (killed by p1) and stays in the game as a dead player.
+  async function killP2(p1: TestPlayer, p2: TestPlayer, gameId: string) {
+    const tombstone = waitFor(p1.socket, "show tombstone");
+    p2.socket.emit("player died", {
+      playerId: p2.id,
+      gameId,
+      killerId: p1.id,
+      col: 3,
+      row: 4,
+    });
+    await tombstone;
+  }
+
+  it("leave game by the last living opponent ends the match with reason disconnect", async () => {
+    const { p1, p2, p3, gameId } = await startThreePlayerGame();
+    await killP2(p1, p2, gameId);
+
+    const ended = waitFor<{ game_id: string; reason: string }>(
+      p1.socket,
+      "end game",
+      2000,
+    );
+    p3.socket.emit("leave game");
+
+    const payload = await ended;
+    expect(payload.game_id).toBe(gameId);
+    expect(payload.reason).toBe("disconnect");
+  });
+
+  it("a disconnect by the last living opponent ends the match with reason disconnect", async () => {
+    const { p1, p2, p3, gameId } = await startThreePlayerGame();
+    await killP2(p1, p2, gameId);
+
+    const ended = waitFor<{ game_id: string; reason: string }>(
+      p1.socket,
+      "end game",
+      2000,
+    );
+    p3.socket.disconnect();
+
+    const payload = await ended;
+    expect(payload.game_id).toBe(gameId);
+    expect(payload.reason).toBe("disconnect");
   });
 
   it("a disconnect clears the Play bomb-queue interval", async () => {

@@ -14,6 +14,7 @@ import { getIo } from "@/io";
 import Lobby from "@/lobby";
 import {
   BombDetails,
+  EndReason,
   NewGamePayload,
   PlayerPositionData,
   PortalDetails,
@@ -26,6 +27,7 @@ type EndGameArgs = {
   game_id: string;
   gameData: NewGamePayload;
   delay: number;
+  reason: EndReason;
   winnerId?: string | null;
   isProcessStats?: boolean;
 };
@@ -100,14 +102,32 @@ class Play {
     this.bombQueue.clear();
   }
 
-  onLeaveGame() {
-    if (this.socket_game_id) {
-      // Clear bomb queue for this game
-      this.bombQueue.delete(this.socket_game_id);
-      runningGames.delete(this.socket_game_id);
-      this.leave(this.socket_game_id);
-      this.socket_game_id = null;
+  // A leave during a running match removes only that player, exactly like a
+  // disconnect. Otherwise (the match already ended, or the game is pending)
+  // only this socket's game state is cleared.
+  onLeaveGame(playerId: string) {
+    const gameId = this.socket_game_id;
+    if (!gameId) {
+      return;
     }
+    const currentGame = runningGames.get(gameId);
+    const isRunning =
+      currentGame !== undefined &&
+      !endingGames.has(gameId) &&
+      currentGame.players.some(player => player.id === playerId);
+
+    if (isRunning) {
+      this.bombQueue.delete(gameId);
+      this.leave(gameId);
+      this.onDisconnectFromGame(playerId);
+      this.socket_game_id = null;
+      return;
+    }
+
+    // Clear bomb queue for this game
+    this.bombQueue.delete(gameId);
+    this.leave(gameId);
+    this.socket_game_id = null;
   }
 
   onStartTimer(game_id: string) {
@@ -135,6 +155,7 @@ class Play {
           isDelaySpoilEnabled: game.isDelaySpoilEnabled,
         },
         delay: 0,
+        reason: "timeout",
         isProcessStats: false,
       });
     }, GAME_DURATION * 1000);
@@ -151,6 +172,7 @@ class Play {
     winnerId = null,
     isProcessStats = true,
     delay,
+    reason,
   }: EndGameArgs) {
     const currentGame = runningGames.get(game_id);
     if (!currentGame || endingGames.has(game_id)) {
@@ -183,6 +205,7 @@ class Play {
         game_id: game_id,
         new_game_id: newGame.id,
         prevGameInfo,
+        reason,
       });
     }, delay * 1000);
   }
@@ -201,7 +224,17 @@ class Play {
 
       currentGame?.removePlayer(playerId);
 
-      if (currentGame?.players.length === 1) {
+      // Dead players stay in the game, so count only the living ones. One
+      // living player wins by forfeit; none left is a draw.
+      const livingCount =
+        currentGame?.players.filter(player => player.isAlive).length ?? 0;
+
+      // A match that is already ending keeps its own reason.
+      if (
+        currentGame &&
+        livingCount <= 1 &&
+        !endingGames.has(this.socket_game_id)
+      ) {
         this.endGame({
           game_id: this.socket_game_id,
           gameData: {
@@ -211,6 +244,7 @@ class Play {
             isDelaySpoilEnabled: currentGame.isDelaySpoilEnabled,
           },
           delay: 0,
+          reason: livingCount === 1 ? "disconnect" : "draw",
           isProcessStats: false,
         });
       } else {
@@ -254,6 +288,7 @@ class Play {
         playerId,
         col: bomb.col,
         row: bomb.row,
+        delay: bomb.delay,
       });
     }
   }
@@ -424,6 +459,7 @@ class Play {
         gameData: currentGameData,
         winnerId: alivePlayer.id,
         delay: 5,
+        reason: "win",
       });
     }
 
@@ -432,6 +468,7 @@ class Play {
         game_id: gameId,
         gameData: currentGameData,
         delay: 2,
+        reason: "draw",
       });
     }
   }
