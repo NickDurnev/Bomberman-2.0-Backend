@@ -1,13 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { POINTS_PER_WIN } from "@/constants";
+import type { EndReason } from "@/types";
 import type { TestPlayer } from "../helpers/players";
 import { expectNoEvent, startTwoPlayerGame, waitFor } from "../helpers/players";
 import { startTestServer, TestServer } from "../helpers/server";
 
 type ShowTombstone = { player_id: string; col: number; row: number };
 type PlayerWin = { winner: { id: string } };
-type EndGame = { game_id: string; new_game_id: string; reason: string };
+type EndGame = { game_id: string; new_game_id: string; reason: EndReason };
 
 // The server sends "end game" 5 s after a win.
 const END_GAME_TIMEOUT_MS = 8000;

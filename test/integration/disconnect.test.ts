@@ -1,4 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+import type { EndReason } from "@/types";
 import type { TestPlayer } from "../helpers/players";
 import {
   connectPlayer,
@@ -13,6 +15,7 @@ import { startTestServer, TestServer } from "../helpers/server";
 type CurrentGame = { players: { id: string }[] };
 type UpdateGame = { current_game: { players: { id: string }[] } };
 type PlayerDisconnect = { player_id: string };
+type EndGame = { game_id: string; reason: EndReason };
 
 describe("disconnect and re-join", () => {
   let server: TestServer;
@@ -112,10 +115,7 @@ describe("disconnect and re-join", () => {
   it("a disconnect that leaves one player ends the match", async () => {
     const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
 
-    const ended = waitFor<{ game_id: string; reason: string }>(
-      p1.socket,
-      "end game",
-    );
+    const ended = waitFor<EndGame>(p1.socket, "end game");
     p2.socket.disconnect();
 
     const payload = await ended;
@@ -152,10 +152,7 @@ describe("disconnect and re-join", () => {
   it("leave game that leaves one player ends the match with reason disconnect", async () => {
     const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
 
-    const ended = waitFor<{ game_id: string; reason: string }>(
-      p1.socket,
-      "end game",
-    );
+    const ended = waitFor<EndGame>(p1.socket, "end game");
     p2.socket.emit("leave game");
 
     const payload = await ended;
@@ -180,11 +177,7 @@ describe("disconnect and re-join", () => {
     const { p1, p2, p3, gameId } = await startThreePlayerGame();
     await killP2(p1, p2, gameId);
 
-    const ended = waitFor<{ game_id: string; reason: string }>(
-      p1.socket,
-      "end game",
-      2000,
-    );
+    const ended = waitFor<EndGame>(p1.socket, "end game", 2000);
     p3.socket.emit("leave game");
 
     const payload = await ended;
@@ -196,11 +189,7 @@ describe("disconnect and re-join", () => {
     const { p1, p2, p3, gameId } = await startThreePlayerGame();
     await killP2(p1, p2, gameId);
 
-    const ended = waitFor<{ game_id: string; reason: string }>(
-      p1.socket,
-      "end game",
-      2000,
-    );
+    const ended = waitFor<EndGame>(p1.socket, "end game", 2000);
     p3.socket.disconnect();
 
     const payload = await ended;

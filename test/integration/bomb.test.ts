@@ -102,7 +102,7 @@ describe("bombs", () => {
       playerId: p1.id,
       col: cell.col,
       row: cell.row,
-      delay: own.delay,
+      delay: INITIAL_DELAY,
     });
     expect(other).toEqual(own);
   });
