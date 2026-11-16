@@ -156,11 +156,6 @@ export function createServer(): {
   });
 
   function onClientDisconnect(client: CustomSocket) {
-    // Always release the per-connection bomb-queue interval, even for sockets
-    // that only visited the lobby and never joined a game — otherwise every
-    // connection leaks a 100ms timer.
-    client.playInstance?.destroy();
-
     if (client.socket_game_id == null) {
       return;
     }
