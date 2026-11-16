@@ -472,19 +472,23 @@ class Play {
   }
 }
 
+// Removes running games that are empty after the match length, or older than
+// DELETE_PENDING_GAMES_INTERVAL.
+export function cleanupRunningGames(games: Map<string, Game>, now: number) {
+  for (const [gameId, game] of games) {
+    const age = now - game.createdAt;
+    if (
+      (age >= GAME_DURATION * 1000 && game.isEmpty()) ||
+      age >= DELETE_PENDING_GAMES_INTERVAL * 1000
+    ) {
+      games.delete(gameId);
+    }
+  }
+}
+
 // Cleanup job: Runs every 1 minute to remove stale running games
 setInterval(() => {
-  const now = Date.now();
-  runningGames.forEach((game, gameId) => {
-    if (now - game.createdAt >= GAME_DURATION * 1000) {
-      if (game.isEmpty()) {
-        Lobby.deletePendingGame(gameId);
-      }
-    }
-    if (now - game.createdAt >= DELETE_PENDING_GAMES_INTERVAL * 1000) {
-      Lobby.deletePendingGame(gameId);
-    }
-  });
+  cleanupRunningGames(runningGames, Date.now());
 }, 60 * 1000).unref();
 
 export default Play;

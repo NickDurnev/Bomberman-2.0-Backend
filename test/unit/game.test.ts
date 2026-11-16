@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { DELETE_PENDING_GAMES_INTERVAL, GAME_DURATION } from "@/constants";
 import { Game } from "@/entity/game";
 import Player from "@/entity/player";
+import { cleanupRunningGames } from "@/play";
 
 function newGame(): Game {
   return new Game({
@@ -38,5 +40,29 @@ describe("Game.markTop3", () => {
       true,
       true,
     ]);
+  });
+});
+
+describe("cleanupRunningGames", () => {
+  it("removes an empty game older than the match length", () => {
+    const game = newGame();
+    const games = new Map([[game.id, game]]);
+    cleanupRunningGames(games, game.createdAt + GAME_DURATION * 1000);
+
+    expect(games.has(game.id)).toBe(false);
+  });
+
+  it("keeps a game with players until the stale interval", () => {
+    const game = newGame();
+    addPlayers(game, 2);
+    const games = new Map([[game.id, game]]);
+    cleanupRunningGames(games, game.createdAt + GAME_DURATION * 1000);
+    expect(games.has(game.id)).toBe(true);
+
+    cleanupRunningGames(
+      games,
+      game.createdAt + DELETE_PENDING_GAMES_INTERVAL * 1000,
+    );
+    expect(games.has(game.id)).toBe(false);
   });
 });
