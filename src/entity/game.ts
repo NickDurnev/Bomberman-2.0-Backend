@@ -42,6 +42,8 @@ export class Game {
   portals: Map<string, Portal>;
   tombstones: Map<string, { row: number; col: number }>;
   createdAt: number;
+  // Set by start(); the running-games cleanup measures the age from it.
+  startedAt: number;
 
   constructor({
     mapName,
@@ -65,6 +67,7 @@ export class Game {
     this.portals = new Map();
     this.tombstones = new Map();
     this.createdAt = Date.now();
+    this.startedAt = this.createdAt;
   }
 
   async addPlayer(id: string, profile?: { name?: string; picture?: string }) {
@@ -122,6 +125,19 @@ export class Game {
       this.playerSpawns.push(player.spawnOnGrid);
       this.players.splice(this.players.indexOf(player), 1);
     }
+  }
+
+  // Called when a death leaves exactly 3 players alive.
+  markTop3() {
+    for (const player of this.players) {
+      if (player.isAlive) {
+        player.top3();
+      }
+    }
+  }
+
+  start() {
+    this.startedAt = Date.now();
   }
 
   isEmpty(): boolean {
@@ -215,6 +231,15 @@ export class Game {
     return this.portals;
   }
 
+  findPortalAt(row: number, col: number) {
+    for (const portal of this.portals.values()) {
+      if (portal.row === row && portal.col === col) {
+        return portal;
+      }
+    }
+    return undefined;
+  }
+
   addSpoil(spoil: Spoil) {
     this.spoils.set(spoil.id, spoil);
   }
@@ -237,6 +262,14 @@ export class Game {
 
   deleteSpoil(spoil_id: string) {
     this.spoils.delete(spoil_id);
+  }
+
+  deleteSpoilAt(row: number, col: number) {
+    for (const [id, spoil] of this.spoils) {
+      if (spoil.row === row && spoil.col === col) {
+        this.spoils.delete(id);
+      }
+    }
   }
 
   deleteBomb(bomb_id: string) {
