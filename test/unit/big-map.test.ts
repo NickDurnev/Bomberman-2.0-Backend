@@ -32,9 +32,9 @@ describe("portal cells per map", () => {
 });
 
 describe("big_map", () => {
-  it("has 20 players on a 40 x 24 grid", () => {
+  it("has 18 players on a 40 x 24 grid", () => {
     const game = bigGame();
-    expect(game.max_players).toBe(20);
+    expect(game.max_players).toBe(18);
     expect(game.shadow_map).toHaveLength(24);
     expect(game.shadow_map[0]).toHaveLength(40);
   });
@@ -55,16 +55,16 @@ describe("big_map", () => {
     }
   });
 
-  it("is full at 20 players, each on its own spawn", async () => {
+  it("is full at 18 players, each on its own spawn", async () => {
     const game = bigGame();
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 18; i++) {
       await game.addPlayer(`p${i}`, { name: `P${i}`, picture: "skin" });
     }
     expect(game.isFull()).toBe(true);
     const spawns = new Set(
       game.players.map(p => `${p.spawnOnGrid.row},${p.spawnOnGrid.col}`),
     );
-    expect(spawns.size).toBe(20);
+    expect(spawns.size).toBe(18);
   });
 });
 
