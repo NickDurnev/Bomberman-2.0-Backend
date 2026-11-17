@@ -41,6 +41,25 @@ export const DEFAULT_MAP_PORTAL_SPAWNS = [
   { row: 19, col: 30 },
 ];
 
+// Real (row, col) of each cell, no spawn offset. Each is a box in the map.
+export const BIG_MAP_PORTAL_SPAWNS = [
+  { row: 1, col: 1 },
+  { row: 1, col: 38 },
+  { row: 21, col: 1 },
+  { row: 21, col: 38 },
+];
+
+const PORTAL_SPAWNS_BY_MAP: Record<string, { row: number; col: number }[]> = {
+  default_map: DEFAULT_MAP_PORTAL_SPAWNS,
+  small_map: SMALL_MAP_PORTAL_SPAWNS,
+  big_map: BIG_MAP_PORTAL_SPAWNS,
+};
+
+// Portal cells of a map; an unknown map uses the default_map cells.
+export function portalSpawnsFor(mapName: string) {
+  return PORTAL_SPAWNS_BY_MAP[mapName] ?? DEFAULT_MAP_PORTAL_SPAWNS;
+}
+
 export const NO_KILL_PHRASES = [
   "I just tried to survive 🏃‍♂️",
   "Just pacifist mode ☮️",
