@@ -7,6 +7,9 @@ on:
 
 jobs:
   deploy:
+    # The merge of release-please's PR only bumps the version and the CHANGELOG
+    # (release.yml); the code it carries is already deployed.
+    if: ${{ !contains(github.event.head_commit.message, 'release-please--branches--main') }}
     runs-on: ubuntu-latest
 
     steps:
