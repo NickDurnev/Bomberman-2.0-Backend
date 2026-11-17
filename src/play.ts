@@ -43,7 +43,8 @@ const winGameInfos: Map<string, ReturnType<Play["addKillPhrases"]>> = new Map();
 // skipped.
 const endingGames: Set<string> = new Set();
 
-// Add bomb queue system
+// Bomb fuses, per game. The queue belongs to the game, not to the owner's
+// connection: a bomb explodes by fuse after its owner leaves or disconnects.
 type BombQueueItem = {
   bombId: string;
   playerId: string;
@@ -51,13 +52,54 @@ type BombQueueItem = {
   detonationTime: number;
 };
 
+const bombQueue: Map<string, BombQueueItem[]> = new Map();
+
+function detonateBomb({ bomb_id, playerId, gameId }: BombDetails) {
+  const currentGame = runningGames.get(gameId);
+  if (!currentGame) {
+    return;
+  }
+
+  const bomb = currentGame.bombs.get(bomb_id);
+  if (bomb) {
+    const blastedCells = bomb.detonate();
+    currentGame.deleteBomb(bomb_id);
+
+    getIo().sockets.to(gameId).emit("detonate bomb", {
+      bomb_id: bomb.id,
+      playerId,
+      blastedCells,
+    });
+  }
+}
+
+// Process the bomb queue every 100ms
+setInterval(() => {
+  const now = Date.now();
+  for (const [gameId, queue] of bombQueue) {
+    if (!runningGames.has(gameId)) {
+      bombQueue.delete(gameId);
+      continue;
+    }
+    for (const item of queue.filter(item => item.detonationTime <= now)) {
+      detonateBomb({
+        bomb_id: item.bombId,
+        playerId: item.playerId,
+        gameId: item.gameId,
+      });
+    }
+    bombQueue.set(
+      gameId,
+      queue.filter(item => item.detonationTime > now),
+    );
+  }
+}, 100).unref();
+
 class Play {
   socket_game_id: string | null = null;
   id: string;
   leave: (gameId: string) => void;
   broadcast: BroadcastOperator<DefaultEventsMap, DefaultEventsMap>;
-  private bombQueue: Map<string, BombQueueItem[]> = new Map();
-  private bombQueueInterval: NodeJS.Timeout | null = null;
 
   constructor(
     id: string,
@@ -67,39 +109,6 @@ class Play {
     this.id = id;
     this.leave = leave;
     this.broadcast = broadcast;
-    this.startBombQueueProcessor();
-  }
-
-  private startBombQueueProcessor() {
-    // Process bomb queue every 100ms
-    this.bombQueueInterval = setInterval(() => {
-      const now = Date.now();
-      this.bombQueue.forEach((queue, gameId) => {
-        const detonations = queue.filter(item => item.detonationTime <= now);
-        detonations.forEach(item => {
-          this.detonateBomb({
-            bomb_id: item.bombId,
-            playerId: item.playerId,
-            gameId: item.gameId,
-          });
-        });
-        // Remove detonated bombs from queue
-        this.bombQueue.set(
-          gameId,
-          queue.filter(item => item.detonationTime > now),
-        );
-      });
-    }, 100);
-  }
-
-  // Release the per-connection bomb-queue interval. Must be called when the
-  // socket disconnects, otherwise every connection leaks a 100ms timer forever.
-  destroy() {
-    if (this.bombQueueInterval) {
-      clearInterval(this.bombQueueInterval);
-      this.bombQueueInterval = null;
-    }
-    this.bombQueue.clear();
   }
 
   // A leave during a running match removes only that player, exactly like a
@@ -117,15 +126,12 @@ class Play {
       currentGame.players.some(player => player.id === playerId);
 
     if (isRunning) {
-      this.bombQueue.delete(gameId);
       this.leave(gameId);
       this.onDisconnectFromGame(playerId);
       this.socket_game_id = null;
       return;
     }
 
-    // Clear bomb queue for this game
-    this.bombQueue.delete(gameId);
     this.leave(gameId);
     this.socket_game_id = null;
   }
@@ -142,6 +148,7 @@ class Play {
     if (!game) {
       return;
     }
+    game.start();
     runningGames.set(game.id, game);
 
     // Time limit. endGame skips the game if it already ended.
@@ -272,16 +279,14 @@ class Play {
     });
 
     if (bomb) {
-      // Add bomb to queue instead of using setTimeout
-      const detonationTime = Date.now() + bomb.delay;
-      const queue = this.bombQueue.get(gameId) || [];
+      const queue = bombQueue.get(gameId) ?? [];
       queue.push({
         bombId: bomb.id,
         playerId,
         gameId,
-        detonationTime,
+        detonationTime: Date.now() + bomb.delay,
       });
-      this.bombQueue.set(gameId, queue);
+      bombQueue.set(gameId, queue);
 
       getIo().sockets.to(gameId).emit("show bomb", {
         bomb_id: bomb.id,
@@ -289,25 +294,6 @@ class Play {
         col: bomb.col,
         row: bomb.row,
         delay: bomb.delay,
-      });
-    }
-  }
-
-  detonateBomb({ bomb_id, playerId, gameId }: BombDetails) {
-    const currentGame = runningGames.get(gameId);
-    if (!currentGame) {
-      return;
-    }
-
-    const bomb = currentGame.bombs.get(bomb_id);
-    if (bomb) {
-      const blastedCells = bomb.detonate();
-      currentGame.deleteBomb(bomb_id);
-
-      getIo().sockets.to(gameId).emit("detonate bomb", {
-        bomb_id: bomb.id,
-        playerId,
-        blastedCells,
       });
     }
   }
@@ -333,7 +319,7 @@ class Play {
   }
 
   onBlastVsBomb({ bomb_id, playerId, gameId }: BombDetails) {
-    this.detonateBomb({ bomb_id, playerId, gameId });
+    detonateBomb({ bomb_id, playerId, gameId });
   }
 
   onPickUpSpoil({ spoil_id, playerId, gameId }: SpoilDetails) {
@@ -435,9 +421,7 @@ class Play {
     }
 
     if (alivePlayersCount === 3) {
-      currentGame.players.forEach(player => {
-        player.top3();
-      });
+      currentGame.markTop3();
     }
 
     const currentGameData = {
@@ -474,19 +458,23 @@ class Play {
   }
 }
 
+// Removes running games that are empty after the match length, or older than
+// DELETE_PENDING_GAMES_INTERVAL, counted from "start game".
+export function cleanupRunningGames(games: Map<string, Game>, now: number) {
+  for (const [gameId, game] of games) {
+    const age = now - game.startedAt;
+    if (
+      (age >= GAME_DURATION * 1000 && game.isEmpty()) ||
+      age >= DELETE_PENDING_GAMES_INTERVAL * 1000
+    ) {
+      games.delete(gameId);
+    }
+  }
+}
+
 // Cleanup job: Runs every 1 minute to remove stale running games
 setInterval(() => {
-  const now = Date.now();
-  runningGames.forEach((game, gameId) => {
-    if (now - game.createdAt >= GAME_DURATION * 1000) {
-      if (game.isEmpty()) {
-        Lobby.deletePendingGame(gameId);
-      }
-    }
-    if (now - game.createdAt >= DELETE_PENDING_GAMES_INTERVAL * 1000) {
-      Lobby.deletePendingGame(gameId);
-    }
-  });
+  cleanupRunningGames(runningGames, Date.now());
 }, 60 * 1000).unref();
 
 export default Play;
