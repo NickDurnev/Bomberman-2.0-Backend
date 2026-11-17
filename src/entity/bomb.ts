@@ -1,9 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import {
-  DEFAULT_MAP_PORTAL_SPAWNS,
   DESTRUCTIBLE_CELL,
   NON_DESTRUCTIBLE_CELL,
-  SMALL_MAP_PORTAL_SPAWNS,
+  portalSpawnsFor,
   SPOIL_CHANCE,
 } from "@/constants";
 import { Game } from "@/entity/game";
@@ -94,10 +93,7 @@ export class Bomb {
     destroyed: boolean,
   ) {
     let isPortal = false;
-    let portalSpawns = DEFAULT_MAP_PORTAL_SPAWNS;
-    if (this.game.mapName === "small_map") {
-      portalSpawns = SMALL_MAP_PORTAL_SPAWNS;
-    }
+    const portalSpawns = portalSpawnsFor(this.game.mapName);
     if (this.game.isPortalsEnabled) {
       isPortal = portalSpawns.some(
         portal => portal.row === row && portal.col === col,
