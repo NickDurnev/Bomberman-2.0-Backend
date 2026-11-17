@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/NickDurnev/Bomberman-2.0-Backend/compare/v1.2.0...v1.3.0) (2026-11-17)
+
+
+### Highlights
+
+* **maps:** lower big_map to 18 players ([3890855](https://github.com/NickDurnev/Bomberman-2.0-Backend/commit/3890855e21a69f52e207526e21254bd06ebb25b2))
+* **maps:** lower big_map to 18 players ([93744a6](https://github.com/NickDurnev/Bomberman-2.0-Backend/commit/93744a60f7063ad8e95bdc4e7f037ca557ad65b6))
+
 ## [1.2.0](https://github.com/NickDurnev/Bomberman-2.0-Backend/compare/v1.1.0...v1.2.0) (2026-11-17)
 
 
