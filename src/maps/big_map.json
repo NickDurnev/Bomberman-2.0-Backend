@@ -56,7 +56,7 @@
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
       ],
       "properties": {
-        "max_players": 18,
+        "max_players": 20,
         "collisionTiles": [1, 5],
         "empty": 6,
         "box": 5,
