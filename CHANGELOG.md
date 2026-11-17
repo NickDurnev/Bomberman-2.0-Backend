@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/NickDurnev/Bomberman-2.0-Backend/compare/v1.1.0...v1.2.0) (2026-11-17)
+
+
+### Highlights
+
+* **maps:** add big_map for 20 players ([b4f6fe2](https://github.com/NickDurnev/Bomberman-2.0-Backend/commit/b4f6fe233a32c8f93524bb6e80383437d4ebb12e))
+* **maps:** add big_map for 20 players ([1208417](https://github.com/NickDurnev/Bomberman-2.0-Backend/commit/1208417db3d489a54d71ef971f24e35904d0a479))
+
 ## [1.1.0](https://github.com/NickDurnev/Bomberman-2.0-Backend/compare/bomberman-2.0-backend-v1.0.0...bomberman-2.0-backend-v1.1.0) (2026-11-17)
 
 
