@@ -48,6 +48,8 @@ export type NewGamePayload = {
   gameName: string;
   isPortalsEnabled: boolean;
   isDelaySpoilEnabled: boolean;
+  // Optional: the server falls back to DEFAULT_TEXTURE_PACK.
+  texturePack?: string;
 };
 
 export type User = {

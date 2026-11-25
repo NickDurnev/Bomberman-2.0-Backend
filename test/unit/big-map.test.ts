@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  ARENA_MAP_PORTAL_SPAWNS,
   BIG_MAP_PORTAL_SPAWNS,
   DEFAULT_MAP_PORTAL_SPAWNS,
   DESTRUCTIBLE_CELL,
@@ -24,6 +25,7 @@ describe("portal cells per map", () => {
     expect(portalSpawnsFor("big_map")).toBe(BIG_MAP_PORTAL_SPAWNS);
     expect(portalSpawnsFor("small_map")).toBe(SMALL_MAP_PORTAL_SPAWNS);
     expect(portalSpawnsFor("default_map")).toBe(DEFAULT_MAP_PORTAL_SPAWNS);
+    expect(portalSpawnsFor("arena_map")).toBe(ARENA_MAP_PORTAL_SPAWNS);
   });
 
   it("falls back to default for an unknown map", () => {

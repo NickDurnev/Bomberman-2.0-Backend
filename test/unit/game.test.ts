@@ -1,5 +1,11 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { DELETE_PENDING_GAMES_INTERVAL, GAME_DURATION } from "@/constants";
+import {
+  DELETE_PENDING_GAMES_INTERVAL,
+  GAME_DURATION,
+  MAP_NAMES,
+} from "@/constants";
 import { Game } from "@/entity/game";
 import Player from "@/entity/player";
 import { cleanupRunningGames } from "@/play";
@@ -40,6 +46,62 @@ describe("Game.markTop3", () => {
       true,
       true,
     ]);
+  });
+});
+
+describe("Game.texturePack", () => {
+  function gameWithPack(texturePack: unknown): Game {
+    return new Game({
+      mapName: "small_map",
+      gameName: "game-unit",
+      isPortalsEnabled: false,
+      isDelaySpoilEnabled: false,
+      texturePack: texturePack as string | undefined,
+    });
+  }
+
+  it("keeps a known pack", () => {
+    expect(gameWithPack("classic").texturePack).toBe("classic");
+  });
+
+  it("uses the default pack when the payload has no pack", () => {
+    expect(newGame().texturePack).toBe("default");
+  });
+
+  it("uses the default pack for an unknown pack id", () => {
+    expect(gameWithPack("nope").texturePack).toBe("default");
+  });
+
+  it("uses the default pack for a pack that is not a string", () => {
+    expect(gameWithPack(42).texturePack).toBe("default");
+  });
+});
+
+describe("Game.mapName", () => {
+  const gameOn = (mapName: string) =>
+    new Game({
+      mapName,
+      gameName: "map-name-unit",
+      isPortalsEnabled: false,
+      isDelaySpoilEnabled: false,
+    });
+
+  it("keeps a map the server has", () => {
+    expect(gameOn("arena_map").mapName).toBe("arena_map");
+  });
+
+  // A client one deploy ahead can name a map this server does not have yet.
+  it("uses default_map for a map the server does not have", () => {
+    const game = gameOn("no_such_map");
+    expect(game.mapName).toBe("default_map");
+    expect(game.max_players).toBe(14);
+  });
+
+  it("lists exactly the maps in src/maps", () => {
+    const files = readdirSync(join(__dirname, "../../src/maps"))
+      .filter(file => file.endsWith(".json"))
+      .map(file => file.replace(/\.json$/, ""));
+    expect([...MAP_NAMES].sort()).toEqual(files.sort());
   });
 });
 

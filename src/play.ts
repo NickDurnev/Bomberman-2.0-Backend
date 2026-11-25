@@ -23,9 +23,13 @@ import {
 } from "@/types";
 import { getRandomItem } from "@/utils";
 
+// The options the next pending game copies. texturePack is required here, so
+// an end-of-match path that forgets it does not compile.
+type NextGameData = NewGamePayload & { texturePack: string };
+
 type EndGameArgs = {
   game_id: string;
-  gameData: NewGamePayload;
+  gameData: NextGameData;
   delay: number;
   reason: EndReason;
   winnerId?: string | null;
@@ -160,6 +164,7 @@ class Play {
           gameName: game.name,
           isPortalsEnabled: game.isPortalsEnabled,
           isDelaySpoilEnabled: game.isDelaySpoilEnabled,
+          texturePack: game.texturePack,
         },
         delay: 0,
         reason: "timeout",
@@ -249,6 +254,7 @@ class Play {
             gameName: currentGame.name,
             isPortalsEnabled: currentGame.isPortalsEnabled,
             isDelaySpoilEnabled: currentGame.isDelaySpoilEnabled,
+            texturePack: currentGame.texturePack,
           },
           delay: 0,
           reason: livingCount === 1 ? "disconnect" : "draw",
@@ -429,6 +435,7 @@ class Play {
       gameName: currentGame.name,
       isPortalsEnabled: currentGame.isPortalsEnabled,
       isDelaySpoilEnabled: currentGame.isDelaySpoilEnabled,
+      texturePack: currentGame.texturePack,
     };
 
     const prevGameInfo = this.addKillPhrases(currentGame);

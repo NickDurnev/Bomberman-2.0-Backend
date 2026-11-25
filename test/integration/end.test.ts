@@ -3,12 +3,23 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { POINTS_PER_WIN } from "@/constants";
 import type { EndReason } from "@/types";
 import type { TestPlayer } from "../helpers/players";
-import { expectNoEvent, startTwoPlayerGame, waitFor } from "../helpers/players";
+import {
+  emitAck,
+  expectNoEvent,
+  startTwoPlayerGame,
+  waitFor,
+} from "../helpers/players";
 import { startTestServer, TestServer } from "../helpers/server";
 
 type ShowTombstone = { player_id: string; col: number; row: number };
 type PlayerWin = { winner: { id: string } };
-type EndGame = { game_id: string; new_game_id: string; reason: EndReason };
+type EndGame = {
+  game_id: string;
+  new_game_id: string;
+  reason: EndReason;
+  prevGameInfo: { texturePack: string };
+};
+type PendingGame = { id: string; texturePack: string };
 
 // The server sends "end game" 5 s after a win.
 const END_GAME_TIMEOUT_MS = 8000;
@@ -94,6 +105,29 @@ describe("match end", () => {
       expect(winnerStats?.points).toBeGreaterThanOrEqual(POINTS_PER_WIN);
       expect(loserStats?.games).toBe(1);
       expect(loserStats?.wins).toBe(0);
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "the next pending game keeps the room's texture pack",
+    async () => {
+      const { p1, p2, gameId } = await startTwoPlayerGame(server.url, {
+        texturePack: "classic",
+      });
+
+      const ended = waitFor<EndGame>(
+        p1.socket,
+        "end game",
+        END_GAME_TIMEOUT_MS,
+      );
+      killP2(p1, p2, gameId);
+      const end = await ended;
+      expect(end.prevGameInfo.texturePack).toBe("classic");
+
+      const games = await emitAck<PendingGame[]>(p1.socket, "enter lobby");
+      const next = games.find(game => game.id === end.new_game_id);
+      expect(next?.texturePack).toBe("classic");
     },
     TEST_TIMEOUT_MS,
   );

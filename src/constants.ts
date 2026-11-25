@@ -42,6 +42,14 @@ export const DEFAULT_MAP_PORTAL_SPAWNS = [
 ];
 
 // Real (row, col) of each cell, no spawn offset. Each is a box in the map.
+export const ARENA_MAP_PORTAL_SPAWNS = [
+  { row: 1, col: 1 },
+  { row: 1, col: 25 },
+  { row: 15, col: 2 },
+  { row: 16, col: 26 },
+];
+
+// Real (row, col) of each cell, no spawn offset. Each is a box in the map.
 export const BIG_MAP_PORTAL_SPAWNS = [
   { row: 1, col: 1 },
   { row: 1, col: 38 },
@@ -51,6 +59,7 @@ export const BIG_MAP_PORTAL_SPAWNS = [
 
 const PORTAL_SPAWNS_BY_MAP: Record<string, { row: number; col: number }[]> = {
   default_map: DEFAULT_MAP_PORTAL_SPAWNS,
+  arena_map: ARENA_MAP_PORTAL_SPAWNS,
   small_map: SMALL_MAP_PORTAL_SPAWNS,
   big_map: BIG_MAP_PORTAL_SPAWNS,
 };
@@ -58,6 +67,31 @@ const PORTAL_SPAWNS_BY_MAP: Record<string, { row: number; col: number }[]> = {
 // Portal cells of a map; an unknown map uses the default_map cells.
 export function portalSpawnsFor(mapName: string) {
   return PORTAL_SPAWNS_BY_MAP[mapName] ?? DEFAULT_MAP_PORTAL_SPAWNS;
+}
+
+// The maps this server has (src/maps/<name>.json). Keep equal to
+// AVAILABLE_MAPS in the client (Bomberman-2.0 src/utils/constants.ts).
+export const MAP_NAMES = ["arena_map", "default_map", "small_map", "big_map"];
+export const DEFAULT_MAP = "default_map";
+
+// The map of a room. A client one deploy ahead can name a map this server does
+// not have: load default_map instead of a missing file, which would throw.
+export function toMapName(value: unknown): string {
+  return typeof value === "string" && MAP_NAMES.includes(value)
+    ? value
+    : DEFAULT_MAP;
+}
+
+// Texture pack ids. Keep equal to TEXTURE_PACKS in the client
+// (Bomberman-2.0 src/utils/texturePacks.ts).
+export const TEXTURE_PACKS = ["default", "classic"];
+export const DEFAULT_TEXTURE_PACK = "default";
+
+// The texture pack of a room; a missing or unknown pack uses the default pack.
+export function toTexturePack(value: unknown): string {
+  return typeof value === "string" && TEXTURE_PACKS.includes(value)
+    ? value
+    : DEFAULT_TEXTURE_PACK;
 }
 
 export const NO_KILL_PHRASES = [
