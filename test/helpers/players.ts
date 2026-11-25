@@ -148,6 +148,7 @@ type GameOptions = {
   mapName?: "small_map" | "default_map";
   isPortalsEnabled?: boolean;
   isDelaySpoilEnabled?: boolean;
+  texturePack?: string;
 };
 
 type CurrentGamePlayer = { id: string };
@@ -186,6 +187,8 @@ export async function startTwoPlayerGame(
       gameName: uniqueName("game"),
       isPortalsEnabled: opts.isPortalsEnabled ?? false,
       isDelaySpoilEnabled: opts.isDelaySpoilEnabled ?? false,
+      // Sent only when set, so a test can create a room without a pack.
+      ...(opts.texturePack !== undefined && { texturePack: opts.texturePack }),
     },
   );
 
