@@ -4,6 +4,7 @@ import {
   EMPTY_CELL,
   NON_DESTRUCTIBLE_CELL,
   TILE_SIZE,
+  toTexturePack,
 } from "@/constants";
 import { Bomb } from "@/entity/bomb";
 import Player from "@/entity/player";
@@ -32,6 +33,8 @@ export class Game {
   mapName: string;
   isPortalsEnabled: boolean;
   isDelaySpoilEnabled: boolean;
+  // A pack id from TEXTURE_PACKS; every player of the room draws it.
+  texturePack: string;
   layer_info: LayerInfo;
   max_players: number;
   players: Player[];
@@ -50,12 +53,14 @@ export class Game {
     gameName,
     isPortalsEnabled,
     isDelaySpoilEnabled,
+    texturePack,
   }: NewGamePayload) {
     this.id = uuidv4();
     this.name = gameName;
     this.mapName = mapName;
     this.isPortalsEnabled = isPortalsEnabled;
     this.isDelaySpoilEnabled = isDelaySpoilEnabled;
+    this.texturePack = toTexturePack(texturePack);
     this.layer_info = require(`../maps/${this.mapName}.json`)
       .layers[0] as LayerInfo;
     this.max_players = this.layer_info.properties.max_players;

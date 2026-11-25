@@ -12,6 +12,7 @@ import { startTestServer, TestServer } from "../helpers/server";
 type GameSummary = {
   id: string;
   name: string;
+  texturePack: string;
   players: { id: string; name: string }[];
 };
 type UpdateGame = { current_game: GameSummary };
@@ -34,12 +35,17 @@ describe("lobby and game start", () => {
     return connectPlayer(server.url, identity);
   }
 
-  function createGame(player: TestPlayer, gameName = uniqueName("game")) {
+  function createGame(
+    player: TestPlayer,
+    gameName = uniqueName("game"),
+    options: { texturePack?: string } = {},
+  ) {
     return emitAck<{ game_id: string }>(player.socket, "create game", {
       mapName: "small_map",
       gameName,
       isPortalsEnabled: false,
       isDelaySpoilEnabled: false,
+      ...options,
     });
   }
 
@@ -224,5 +230,34 @@ describe("lobby and game start", () => {
     expect(game.players.map(player => player.id).sort()).toEqual(
       [p1.id, p2.id].sort(),
     );
+  });
+
+  it("a game created with a texture pack launches with it for both players", async () => {
+    const p1 = await newPlayer("p1");
+    const p2 = await newPlayer("p2");
+    const { game_id } = await createGame(p1, uniqueName("game"), {
+      texturePack: "classic",
+    });
+    for (const player of [p1, p2]) {
+      const entered = waitFor(player.socket, "update game");
+      player.socket.emit("enter pending game", game_id);
+      await entered;
+    }
+
+    const launched = Promise.all([
+      waitFor<GameSummary>(p1.socket, "launch game"),
+      waitFor<GameSummary>(p2.socket, "launch game"),
+    ]);
+    p1.socket.emit("start game", game_id);
+    for (const game of await launched) {
+      expect(game.texturePack).toBe("classic");
+    }
+
+    const current = await emitAck<GameSummary>(
+      p1.socket,
+      "get current game",
+      game_id,
+    );
+    expect(current.texturePack).toBe("classic");
   });
 });

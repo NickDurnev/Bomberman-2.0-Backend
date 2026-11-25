@@ -43,6 +43,34 @@ describe("Game.markTop3", () => {
   });
 });
 
+describe("Game.texturePack", () => {
+  function gameWithPack(texturePack: unknown): Game {
+    return new Game({
+      mapName: "small_map",
+      gameName: "game-unit",
+      isPortalsEnabled: false,
+      isDelaySpoilEnabled: false,
+      texturePack: texturePack as string | undefined,
+    });
+  }
+
+  it("keeps a known pack", () => {
+    expect(gameWithPack("classic").texturePack).toBe("classic");
+  });
+
+  it("uses the default pack when the payload has no pack", () => {
+    expect(newGame().texturePack).toBe("default");
+  });
+
+  it("uses the default pack for an unknown pack id", () => {
+    expect(gameWithPack("nope").texturePack).toBe("default");
+  });
+
+  it("uses the default pack for a pack that is not a string", () => {
+    expect(gameWithPack(42).texturePack).toBe("default");
+  });
+});
+
 describe("cleanupRunningGames", () => {
   it("removes an empty game older than the match length", () => {
     const game = newGame();

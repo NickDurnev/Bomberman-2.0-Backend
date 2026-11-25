@@ -60,6 +60,18 @@ export function portalSpawnsFor(mapName: string) {
   return PORTAL_SPAWNS_BY_MAP[mapName] ?? DEFAULT_MAP_PORTAL_SPAWNS;
 }
 
+// Texture pack ids. Keep equal to TEXTURE_PACKS in the client
+// (Bomberman-2.0 src/utils/texturePacks.ts).
+export const TEXTURE_PACKS = ["default", "classic"];
+export const DEFAULT_TEXTURE_PACK = "default";
+
+// The texture pack of a room; a missing or unknown pack uses the default pack.
+export function toTexturePack(value: unknown): string {
+  return typeof value === "string" && TEXTURE_PACKS.includes(value)
+    ? value
+    : DEFAULT_TEXTURE_PACK;
+}
+
 export const NO_KILL_PHRASES = [
   "I just tried to survive 🏃‍♂️",
   "Just pacifist mode ☮️",
