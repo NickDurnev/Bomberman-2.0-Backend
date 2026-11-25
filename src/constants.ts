@@ -42,6 +42,14 @@ export const DEFAULT_MAP_PORTAL_SPAWNS = [
 ];
 
 // Real (row, col) of each cell, no spawn offset. Each is a box in the map.
+export const ARENA_MAP_PORTAL_SPAWNS = [
+  { row: 1, col: 1 },
+  { row: 1, col: 25 },
+  { row: 15, col: 2 },
+  { row: 16, col: 26 },
+];
+
+// Real (row, col) of each cell, no spawn offset. Each is a box in the map.
 export const BIG_MAP_PORTAL_SPAWNS = [
   { row: 1, col: 1 },
   { row: 1, col: 38 },
@@ -51,6 +59,7 @@ export const BIG_MAP_PORTAL_SPAWNS = [
 
 const PORTAL_SPAWNS_BY_MAP: Record<string, { row: number; col: number }[]> = {
   default_map: DEFAULT_MAP_PORTAL_SPAWNS,
+  arena_map: ARENA_MAP_PORTAL_SPAWNS,
   small_map: SMALL_MAP_PORTAL_SPAWNS,
   big_map: BIG_MAP_PORTAL_SPAWNS,
 };
