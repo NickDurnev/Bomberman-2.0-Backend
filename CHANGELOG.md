@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.0](https://github.com/NickDurnev/Bomberman-2.0-Backend/compare/v1.4.0...v1.5.0) (2026-11-25)
+
+
+### Highlights
+
+* **game:** keep the room's texture pack in the game ([4622426](https://github.com/NickDurnev/Bomberman-2.0-Backend/commit/46224263d0925d4baa4c909e95b9721bb327c9b4))
+* **maps:** add arena_map ([9b8d59a](https://github.com/NickDurnev/Bomberman-2.0-Backend/commit/9b8d59a53b4ec7907a7df0689558fc21fe81e7ca))
+* texture pack per room and arena_map ([7cd72d3](https://github.com/NickDurnev/Bomberman-2.0-Backend/commit/7cd72d3398f7c71637cd66d71bab9245a2092a21))
+
+
+### Fixes
+
+* **game:** load default_map for a map the server does not have ([046db5c](https://github.com/NickDurnev/Bomberman-2.0-Backend/commit/046db5ceff15738f191433832e099e98cf75297c))
+
 ## [1.4.0](https://github.com/NickDurnev/Bomberman-2.0-Backend/compare/v1.3.0...v1.4.0) (2026-11-17)
 
 
