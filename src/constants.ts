@@ -69,6 +69,19 @@ export function portalSpawnsFor(mapName: string) {
   return PORTAL_SPAWNS_BY_MAP[mapName] ?? DEFAULT_MAP_PORTAL_SPAWNS;
 }
 
+// The maps this server has (src/maps/<name>.json). Keep equal to
+// AVAILABLE_MAPS in the client (Bomberman-2.0 src/utils/constants.ts).
+export const MAP_NAMES = ["arena_map", "default_map", "small_map", "big_map"];
+export const DEFAULT_MAP = "default_map";
+
+// The map of a room. A client one deploy ahead can name a map this server does
+// not have: load default_map instead of a missing file, which would throw.
+export function toMapName(value: unknown): string {
+  return typeof value === "string" && MAP_NAMES.includes(value)
+    ? value
+    : DEFAULT_MAP;
+}
+
 // Texture pack ids. Keep equal to TEXTURE_PACKS in the client
 // (Bomberman-2.0 src/utils/texturePacks.ts).
 export const TEXTURE_PACKS = ["default", "classic"];

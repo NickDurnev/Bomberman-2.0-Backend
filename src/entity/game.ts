@@ -4,6 +4,7 @@ import {
   EMPTY_CELL,
   NON_DESTRUCTIBLE_CELL,
   TILE_SIZE,
+  toMapName,
   toTexturePack,
 } from "@/constants";
 import { Bomb } from "@/entity/bomb";
@@ -57,7 +58,7 @@ export class Game {
   }: NewGamePayload) {
     this.id = uuidv4();
     this.name = gameName;
-    this.mapName = mapName;
+    this.mapName = toMapName(mapName);
     this.isPortalsEnabled = isPortalsEnabled;
     this.isDelaySpoilEnabled = isDelaySpoilEnabled;
     this.texturePack = toTexturePack(texturePack);
