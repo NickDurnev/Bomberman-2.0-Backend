@@ -392,9 +392,26 @@ class Play {
     }
   }
 
-  onPlayerDied({ col, row, playerId, gameId, killerId }: UserDetails) {
+  // senderId: the reporting socket's player id. A client reports only its
+  // own death.
+  onPlayerDied(
+    { col, row, playerId, gameId, killerId }: UserDetails,
+    senderId: string,
+  ) {
+    if (!senderId || playerId !== senderId) {
+      return;
+    }
     const currentGame = runningGames.get(gameId);
     if (!currentGame) {
+      return;
+    }
+
+    // A player dies once. A client touching two blast cells in one frame can
+    // report its death twice: a second tombstone and kill would be wrong.
+    const currentPlayer = currentGame.players.find(
+      player => player.id === playerId,
+    );
+    if (!currentPlayer?.isAlive) {
       return;
     }
 
@@ -406,10 +423,7 @@ class Play {
       .sockets.to(gameId)
       .emit("show tombstone", { player_id: playerId, tombId, col, row });
 
-    const currentPlayer = currentGame.players.find(
-      player => player.id === playerId,
-    );
-    currentPlayer?.dead();
+    currentPlayer.dead();
 
     const currentKiller = currentGame.players.find(
       player => player.id === killerId,

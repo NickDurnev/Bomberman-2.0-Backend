@@ -17,7 +17,10 @@ type EndGame = {
   game_id: string;
   new_game_id: string;
   reason: EndReason;
-  prevGameInfo: { texturePack: string };
+  prevGameInfo: {
+    texturePack: string;
+    players: { id: string; kills?: string[] }[];
+  };
 };
 type PendingGame = { id: string; texturePack: string };
 
@@ -108,6 +111,52 @@ describe("match end", () => {
     },
     TEST_TIMEOUT_MS,
   );
+
+  it(
+    "a second death report for a dead player is ignored",
+    async () => {
+      const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
+
+      const tombstone = waitFor<ShowTombstone>(p1.socket, "show tombstone");
+      const won = waitFor<PlayerWin>(p1.socket, "player win");
+      const ended = waitFor<EndGame>(
+        p1.socket,
+        "end game",
+        END_GAME_TIMEOUT_MS,
+      );
+      killP2(p1, p2, gameId);
+      await Promise.all([tombstone, won]);
+
+      // A client touching two blast cells reported its death twice.
+      const noSecondTombstone = expectNoEvent(p1.socket, "show tombstone");
+      const noSecondWin = expectNoEvent(p1.socket, "player win");
+      killP2(p1, p2, gameId);
+      await Promise.all([noSecondTombstone, noSecondWin]);
+
+      // The results list the kill once (prevGameInfo holds the live Player).
+      const end = await ended;
+      const winner = end.prevGameInfo.players.find(
+        player => player.id === p1.id,
+      );
+      expect(winner?.kills).toEqual([p2.id]);
+    },
+    TEST_TIMEOUT_MS,
+  );
+
+  it("a death report for another player is ignored", async () => {
+    const { p1, p2, gameId } = await startTwoPlayerGame(server.url);
+
+    // Player 1's client claims that player 2 died.
+    const noTombstone = expectNoEvent(p2.socket, "show tombstone");
+    p1.socket.emit("player died", {
+      playerId: p2.id,
+      gameId,
+      killerId: p1.id,
+      col: 3,
+      row: 4,
+    });
+    await noTombstone;
+  });
 
   it(
     "the next pending game keeps the room's texture pack",
